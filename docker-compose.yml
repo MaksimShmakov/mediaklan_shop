@@ -12,8 +12,6 @@ services:
     restart: unless-stopped
   web:
     build: .
-    ports:
-      - "8000:8000"
     env_file:
       - .env
     environment:
@@ -22,6 +20,16 @@ services:
       - ./app/static/uploads:/app/app/static/uploads
     depends_on:
       - db
+    restart: unless-stopped
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./app/static:/var/www/static:ro
+    depends_on:
+      - web
     restart: unless-stopped
 
 volumes:
