@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Медиаклан Маркет</title>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-orbs"></div>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <div class="brand">
+          <a href="/shops" class="brand__link">
+            <img
+              class="brand__logo"
+              src="{{ request.url_for('static', path='img/logo-acc-2.svg') }}"
+              alt="EL"
+            />
+            <span class="brand__title">Медиаклан</span>
+          </a>
+          <span class="brand__tag">маркет</span>
+        </div>
+        <nav class="topbar__nav">
+          {% if user %}
+          <div class="pill">
+            <span class="pill__label">{{ user.tg_username }}</span>
+            <span class="pill__value">{{ user.points }} баллов</span>
+          </div>
+          <a class="ghost" href="/logout">Выход</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container main__inner">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="footer"></footer>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

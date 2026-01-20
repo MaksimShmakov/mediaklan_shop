@@ -1,0 +1,284 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+<section class="hero hero--compact">
+  <div>
+    <h1>Админ панель</h1>
+  </div>
+  <a class="ghost" href="/admin/logout">Выйти</a>
+</section>
+
+<section class="card panel">
+  <h2>Окна работы магазинов</h2>
+  <div class="grid grid--two">
+    {% for shop_type in ["regular", "premium"] %}
+    {% set settings = settings_by_shop[shop_type] %}
+    <form class="form" method="post" action="/admin/settings/set">
+      <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+      <div class="panel__header">
+        <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
+      </div>
+      <label class="field">
+        <span>Открывается</span>
+        <input
+          type="datetime-local"
+          name="opens_at"
+          value="{{ settings.opens_at.strftime('%Y-%m-%dT%H:%M') if settings and settings.opens_at else '' }}"
+        />
+      </label>
+      <label class="field">
+        <span>Закрывается</span>
+        <input
+          type="datetime-local"
+          name="closes_at"
+          value="{{ settings.closes_at.strftime('%Y-%m-%dT%H:%M') if settings and settings.closes_at else '' }}"
+        />
+      </label>
+      <button class="btn" type="submit">Сохранить окно</button>
+    </form>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card panel">
+  <h2>Доступ по tg_username</h2>
+  <div class="grid grid--two">
+    {% for shop_type in ["regular", "premium"] %}
+    <div>
+      <div class="panel__header">
+        <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
+      </div>
+      <form class="form" method="post" action="/admin/allowlist/add">
+        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+        <label class="field">
+          <span>tg_username</span>
+          <input type="text" name="tg_username" placeholder="@username" required />
+        </label>
+        <button class="btn btn--ghost" type="submit">Добавить</button>
+      </form>
+      <div class="list">
+        {% for entry in allowlist_by_shop[shop_type] %}
+        <div class="list__row">
+          <span>{{ entry.tg_username }}</span>
+          <form method="post" action="/admin/allowlist/remove">
+            <input type="hidden" name="entry_id" value="{{ entry.id }}" />
+            <button class="ghost" type="submit">Убрать</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card panel">
+  <h2>Баллы пользователей</h2>
+  <form class="form form--inline" method="post" action="/admin/points/set">
+    <label class="field">
+      <span>tg_username</span>
+      <input type="text" name="tg_username" placeholder="@username" required />
+    </label>
+    <label class="field">
+      <span>Баллы</span>
+      <input type="number" name="points" min="0" step="1" required />
+    </label>
+    <button class="btn" type="submit">Установить</button>
+  </form>
+  <div class="list">
+    {% for user in users %}
+    <div class="list__row">
+      <span>{{ user.tg_username }}</span>
+      <span class="pill pill--inline">{{ user.points }} баллов</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card panel">
+  <h2>Заказы и статусы</h2>
+  <div class="orders-actions">
+    <form class="form form--inline" method="get" action="/admin">
+      <label class="field field--compact">
+        <span>Статус</span>
+        <select name="status">
+          <option value="" {% if not status_filter %}selected{% endif %}>Все</option>
+          {% for status in order_statuses %}
+          <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+            {{ order_status_labels[status] }}
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field field--compact">
+        <span>С даты</span>
+        <input type="date" name="date_from" value="{{ date_from }}" />
+      </label>
+      <label class="field field--compact">
+        <span>По дату</span>
+        <input type="date" name="date_to" value="{{ date_to }}" />
+      </label>
+      <button class="ghost" type="submit">Фильтровать</button>
+      <a class="ghost" href="/admin">Сбросить</a>
+    </form>
+    <a class="btn btn--ghost" href="{{ export_url }}">Скачать CSV</a>
+  </div>
+  <div class="list">
+    {% if orders %}
+    {% for item in orders %}
+    <div class="list__row list__row--stack">
+      <div class="list__main">
+        <strong>{{ item.product_title or "Товар" }}</strong>
+        <span class="muted">{{ item.variant_label }}</span>
+        <span class="pill pill--muted">{{ item.order.points_spent }} баллов</span>
+        <span class="muted">{{ item.order.tg_username }}</span>
+      </div>
+      <form class="form form--inline" method="post" action="/admin/order/status">
+        <input type="hidden" name="order_id" value="{{ item.order.id }}" />
+        <label class="field field--compact">
+          <span>Статус</span>
+          <select name="status">
+            {% for status in order_statuses %}
+            <option value="{{ status }}" {% if item.order.status == status %}selected{% endif %}>
+              {{ order_status_labels[status] }}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="ghost" type="submit">Сохранить</button>
+      </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="muted">Пока нет заказов.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card panel">
+  <h2>Товары и карточки</h2>
+  <div class="grid grid--two">
+    {% for shop_type in ["regular", "premium"] %}
+    <div>
+      <div class="panel__header">
+        <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
+      </div>
+      <form class="form" method="post" action="/admin/product/add" enctype="multipart/form-data">
+        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+        <label class="field">
+          <span>Название</span>
+          <input type="text" name="title" required />
+        </label>
+        <label class="field">
+          <span>Описание</span>
+          <textarea name="description" rows="3"></textarea>
+        </label>
+        <label class="field">
+          <span>Загрузить изображение</span>
+          <input type="file" name="image_file" accept="image/*" />
+        </label>
+        <label class="field">
+          <span>Варианты (каждая строка: Номинал | Баллы | Кол-во)</span>
+          <textarea
+            name="variants_raw"
+            rows="3"
+            placeholder="Номинал 1000 | 1500 | 10&#10;Номинал 2000 | 2800"
+          ></textarea>
+          <small class="hint">Кол-во можно не указывать, тогда вариант будет безлимитным.</small>
+        </label>
+        <label class="field">
+          <span>Позиция</span>
+          <input type="number" name="position" min="0" step="1" value="0" />
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="active" checked />
+          <span>Активный товар</span>
+        </label>
+        <button class="btn" type="submit">Добавить товар</button>
+      </form>
+
+      {% for product in products_by_shop[shop_type] %}
+      <div class="card subcard">
+        <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data">
+          <input type="hidden" name="product_id" value="{{ product.id }}" />
+          <label class="field">
+            <span>Название</span>
+            <input type="text" name="title" value="{{ product.title }}" required />
+          </label>
+          <label class="field">
+            <span>Описание</span>
+            <textarea name="description" rows="3">{{ product.description or '' }}</textarea>
+          </label>
+          {% if product.image_url %}
+          <div class="image-preview">
+            <img src="{{ product.image_url }}" alt="Фото товара" />
+          </div>
+          {% endif %}
+          <label class="field">
+            <span>Загрузить изображение</span>
+            <input type="file" name="image_file" accept="image/*" />
+          </label>
+          <label class="field">
+            <span>Позиция</span>
+            <input type="number" name="position" min="0" step="1" value="{{ product.position }}" />
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="active" {% if product.active %}checked{% endif %} />
+            <span>Активный товар</span>
+          </label>
+          <div class="actions">
+            <button class="btn btn--ghost" type="submit">Сохранить</button>
+          </div>
+        </form>
+        {% if product.image_url %}
+        <form method="post" action="/admin/product/photo/delete" class="form form--inline">
+          <input type="hidden" name="product_id" value="{{ product.id }}" />
+          <button class="ghost" type="submit">Удалить фото</button>
+        </form>
+        {% endif %}
+        <form method="post" action="/admin/product/delete" class="form form--inline">
+          <input type="hidden" name="product_id" value="{{ product.id }}" />
+          <button class="ghost" type="submit">Удалить товар</button>
+        </form>
+
+        <div class="variants">
+          <h4>Варианты</h4>
+          {% for variant in product.variants %}
+          <form class="form form--inline" method="post" action="/admin/variant/update">
+            <input type="hidden" name="variant_id" value="{{ variant.id }}" />
+            <input type="text" name="label" value="{{ variant.label }}" required />
+            <input type="number" name="points_cost" min="0" step="1" value="{{ variant.points_cost }}" required />
+            <input type="number" name="stock" min="0" step="1" value="{{ variant.stock if variant.stock is not none else '' }}" placeholder="∞" />
+            <label class="checkbox">
+              <input type="checkbox" name="active" {% if variant.active %}checked{% endif %} />
+              <span>Активен</span>
+            </label>
+            <button class="ghost" type="submit">Сохранить</button>
+          </form>
+          <form method="post" action="/admin/variant/delete" class="form form--inline">
+            <input type="hidden" name="variant_id" value="{{ variant.id }}" />
+            <button class="ghost" type="submit">Удалить</button>
+          </form>
+          {% endfor %}
+
+          <form class="form form--inline" method="post" action="/admin/variant/add">
+            <input type="hidden" name="product_id" value="{{ product.id }}" />
+            <input type="text" name="label" placeholder="Номинал" required />
+            <input type="number" name="points_cost" min="0" step="1" placeholder="Баллы" required />
+            <input type="number" name="stock" min="0" step="1" placeholder="Кол-во или пусто" />
+            <label class="checkbox">
+              <input type="checkbox" name="active" checked />
+              <span>Активен</span>
+            </label>
+            <button class="btn btn--ghost" type="submit">Добавить вариант</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<section class="hero hero--compact">
+  <div>
+    <p class="kicker">{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</p>
+    <h1>{{ product.title if product else "Карточка товара" }}</h1>
+    <p>Подберите вариант и подтвердите списание баллов.</p>
+  </div>
+  <a class="ghost" href="/shop/{{ shop_type }}">Назад к товарам</a>
+</section>
+
+{% if not allowed %}
+<section class="card panel">
+  <h2>Доступ закрыт</h2>
+  <p>Редакторы пока не открыли для вас этот магазин. Если это ошибка - напишите куратору.</p>
+</section>
+{% elif not open_now %}
+<section class="card panel">
+  <h2>Магазин в данный момент не работает</h2>
+  <p>
+    {% if settings and settings.opens_at and settings.closes_at %}
+    Окно продаж: {{ settings.opens_at.strftime('%d.%m %H:%M') }} - {{ settings.closes_at.strftime('%d.%m %H:%M') }}
+    {% else %}
+    Время работы еще не настроено.
+    {% endif %}
+  </p>
+</section>
+{% elif not product %}
+<section class="card panel">
+  <h2>Товар не найден</h2>
+  <p>Похоже, карточка удалена или недоступна.</p>
+</section>
+{% else %}
+<section class="card product-detail">
+  <div class="product-detail__media">
+    {% if product.image_url %}
+    <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+    {% else %}
+    <div class="image-placeholder">Фото</div>
+    {% endif %}
+  </div>
+  <div class="product-detail__info">
+    <h2>{{ product.title }}</h2>
+    <p class="muted">{{ product.description or "" }}</p>
+    {% set active_variants = product.variants | selectattr('active') | list %}
+    <div class="product__variants">
+      {% if active_variants %}
+      {% for variant in active_variants %}
+      <button
+        class="btn btn--ghost redeem-btn"
+        data-variant="{{ variant.id }}"
+        {% if variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
+      >
+        <span>{{ variant.label }}</span>
+        <span class="pill pill--inline">{{ variant.points_cost }} баллов</span>
+        {% if variant.stock is not none %}
+        <span class="muted">Осталось: {{ variant.stock }}</span>
+        {% endif %}
+      </button>
+      {% endfor %}
+      {% else %}
+      <div class="alert">Покупка на данный момент недоступна.</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ request.url_for('static', path='js/shop.js') }}"></script>
+{% endblock %}

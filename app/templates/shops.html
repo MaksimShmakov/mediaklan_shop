@@ -1,0 +1,39 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН МЕДИАКЛАНА</h1>
+  </div>
+</section>
+
+<section class="grid">
+  {% for shop_type in ["regular", "premium"] %}
+  {% set state = status_map[shop_type] %}
+  <article class="card shop-card">
+    <div class="shop-card__head">
+      <h2>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h2>
+      {% if state.open %}
+      <span class="chip chip--open">Открыт</span>
+      {% else %}
+      <span class="chip chip--closed">Закрыт</span>
+      {% endif %}
+    </div>
+    <p class="muted">
+      {% if state.opens_at and state.closes_at %}
+      Окно продаж: {{ state.opens_at.strftime('%d.%m %H:%M') }} — {{ state.closes_at.strftime('%d.%m %H:%M') }}
+      {% else %}
+      Окно продаж еще не настроено.
+      {% endif %}
+    </p>
+    <div class="shop-card__actions">
+      {% if state.allowed %}
+      <a class="btn" href="/shop/{{ shop_type }}">Перейти</a>
+      {% else %}
+      <span class="pill pill--muted">Доступ закрыт</span>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

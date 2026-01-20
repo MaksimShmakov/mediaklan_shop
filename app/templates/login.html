@@ -1,0 +1,25 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<section class="card panel">
+  <div class="panel__header">
+    <h1>Вход в магазин</h1>
+    <p>Используйте tg_username и пароль.</p>
+  </div>
+  <form class="form" method="post" action="/login">
+    <label class="field">
+      <span>tg_username</span>
+      <input type="text" name="tg_username" placeholder="@egeland_the_best" required />
+    </label>
+    <label class="field">
+      <span>Пароль</span>
+      <input type="password" name="password" required />
+    </label>
+    {% if error %}
+    <div class="alert">{{ error }}</div>
+    {% endif %}
+    <button class="btn" type="submit">Продолжить</button>
+    <a class="ghost" href="/register">Нет аккаунта? Регистрация</a>
+  </form>
+</section>
+{% endblock %}
