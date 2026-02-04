@@ -927,11 +927,7 @@ textarea {
 }
 
 .auth-decor--tape {
-  right: 60px;
-  top: 140px;
-  width: 120px;
-  transform: rotate(-8deg);
-  z-index: 3;
+  display: none;
 }
 
 .auth-panel {
@@ -1100,6 +1096,16 @@ textarea {
   pointer-events: none;
 }
 
+.polaroid__tape {
+  position: absolute;
+  left: -10px;
+  top: -28px;
+  width: 120px;
+  transform: rotate(-12deg);
+  z-index: 4;
+  pointer-events: none;
+}
+
 .polaroid--left .polaroid__photo {
   --photo: var(--auth-photo-left);
   background-position: 50% 30%;
@@ -1117,8 +1123,8 @@ textarea {
 
 .polaroid--left {
   position: absolute;
-  left: -120px;
-  top: 220px;
+  left: -40px;
+  top: 230px;
   transform: rotate(-14.17deg);
 }
 
@@ -1128,8 +1134,8 @@ textarea {
 
 .polaroid-stack {
   position: absolute;
-  right: -40px;
-  top: 140px;
+  right: -10px;
+  top: 120px;
   width: 330px;
   height: 620px;
 }
@@ -1144,14 +1150,14 @@ textarea {
 .polaroid--rear {
   position: absolute;
   right: 0;
-  top: 48px;
+  top: 30px;
   transform: rotate(15.12deg);
 }
 
 .polaroid--front {
   position: absolute;
   left: 12px;
-  bottom: 0;
+  bottom: 90px;
   transform: rotate(-6.14deg);
   width: 273px;
   height: 330px;
