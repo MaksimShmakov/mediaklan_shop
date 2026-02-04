@@ -759,7 +759,7 @@ textarea {
 }
 
 .auth .main {
-  padding: 28px 0 80px;
+  padding: 0;
 }
 
 .auth .main__inner {
@@ -767,32 +767,35 @@ textarea {
 }
 
 .auth .container {
-  width: min(100% - 48px, 1280px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
 }
 
 .auth-shell {
-  width: min(100% - 32px, 1280px);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
 }
 
 .auth-caption {
+  position: absolute;
+  top: 12px;
+  left: 24px;
   font-size: 0.9rem;
-  color: #6f6f78;
+  color: rgba(255, 255, 255, 0.7);
   letter-spacing: 0.4px;
+  z-index: 2;
 }
 
 .auth-board {
   position: relative;
   padding: 0 24px 34px;
-  border-radius: 24px;
+  border-radius: 0;
   background: radial-gradient(51.96% 50% at 50% 50%, #d3bbff 0%, #8d73be 100%);
   box-shadow: 0 28px 60px rgba(34, 22, 64, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.25);
   overflow: hidden;
-  min-height: 750px;
+  min-height: 100vh;
   width: 100%;
 }
 
@@ -839,6 +842,7 @@ textarea {
   color: #ffffff;
   border-radius: 0 0 20px 20px;
   padding: 0 18px;
+  margin: 0 -24px;
   height: 68px;
   display: flex;
   align-items: center;
@@ -1229,7 +1233,7 @@ textarea {
   }
 
   .auth-shell {
-    width: min(100% - 24px, 520px);
+    width: 100%;
   }
 
   .auth-board {
