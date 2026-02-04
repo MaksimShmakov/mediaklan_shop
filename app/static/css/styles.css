@@ -851,7 +851,7 @@ textarea {
 .auth-board::after {
   background-image: var(--auth-texture-paper);
   mix-blend-mode: overlay;
-  opacity: 0.08;
+  opacity: 0.14;
 }
 
 .auth-topbar {
@@ -906,12 +906,23 @@ textarea {
   position: absolute;
   z-index: 1;
   pointer-events: none;
+  width: 162px;
+  height: 177px;
+  overflow: hidden;
+}
+
+.auth-decor img {
+  position: absolute;
+  width: 220px;
+  height: auto;
+  left: -34px;
+  top: 10px;
+  transform: rotate(100deg);
 }
 
 .auth-decor--stars-left {
   left: 380px;
   top: 258px;
-  width: 149px;
   opacity: 0.8;
   transform: rotate(23.79deg);
   mix-blend-mode: screen;
@@ -922,7 +933,6 @@ textarea {
 .auth-decor--stars-right {
   left: 1280px;
   top: 908px;
-  width: 149px;
   opacity: 0.3;
   transform: rotate(23.79deg);
   mix-blend-mode: soft-light;
@@ -1097,9 +1107,9 @@ textarea {
 
 .polaroid__clip {
   position: absolute;
-  left: -52px;
-  top: -48px;
-  width: 140px;
+  left: 20px;
+  top: -38px;
+  width: 120px;
   z-index: 3;
   pointer-events: none;
 }
@@ -1116,7 +1126,7 @@ textarea {
 
 .polaroid--left .polaroid__photo {
   --photo: var(--auth-photo-left);
-  background-position: 50% 30%;
+  background-position: 60% 30%;
 }
 
 .polaroid--rear .polaroid__photo {
@@ -1135,7 +1145,7 @@ textarea {
   --polaroid-height: 443px;
   --polaroid-padding: 22px;
   --polaroid-bottom: 74px;
-  left: -81px;
+  left: -20px;
   top: 410px;
   transform: rotate(-14deg);
 }
@@ -1159,6 +1169,13 @@ textarea {
   top: 211px;
   transform: rotate(15deg);
   z-index: 2;
+}
+
+.polaroid--rear .polaroid__tape {
+  width: 110px;
+  left: calc(100% - 96px);
+  top: -28px;
+  transform: rotate(-8deg);
 }
 
 .polaroid--front {
