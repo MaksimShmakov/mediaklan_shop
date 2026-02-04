@@ -750,6 +750,7 @@ textarea {
   color-scheme: light;
   --auth-texture-main: none;
   --auth-texture-paper: none;
+  min-height: 100vh;
 }
 
 .auth .bg-orbs,
@@ -765,11 +766,15 @@ textarea {
 .auth .main__inner {
   align-items: stretch;
   min-height: 100vh;
+  width: 100%;
+  padding: 0;
 }
 
 .auth .container {
   width: 100%;
+  max-width: 100%;
   margin: 0;
+  padding: 0;
 }
 
 .auth-shell {
