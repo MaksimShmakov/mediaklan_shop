@@ -805,6 +805,14 @@ textarea {
   overflow: hidden;
 }
 
+.auth-stage {
+  position: relative;
+  width: 1280px;
+  height: 750px;
+  transform: scaleX(calc(100vw / 1280)) scaleY(calc(100vh / 750));
+  transform-origin: top left;
+}
+
 .auth--login .auth-board {
   --auth-texture-main: url("/static/img/auth/AU-FG-Texture1-8K.jpg");
   --auth-texture-paper: url("/static/img/auth/DESIGNSYNDROME-PAPERCUT-TEXTURE---TRANSPARENT59.png");
@@ -842,13 +850,15 @@ textarea {
 }
 
 .auth-topbar {
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
   z-index: 1;
   background: #1d1c1d;
   color: #ffffff;
   border-radius: 0 0 20px 20px;
-  padding: 0 18px;
-  margin: 0 -24px;
+  padding: 0 36px;
   height: 68px;
   display: flex;
   align-items: center;
@@ -886,18 +896,6 @@ textarea {
   color: #ede5fc;
 }
 
-.auth-board__body {
-  position: relative;
-  z-index: 1;
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 620px;
-  padding: 0 24px;
-  width: 100%;
-}
-
 .auth-decor {
   position: absolute;
   z-index: 1;
@@ -905,9 +903,9 @@ textarea {
 }
 
 .auth-decor--stars-left {
-  left: 260px;
-  top: 250px;
-  width: 150px;
+  left: 254px;
+  top: 172px;
+  width: 108px;
   opacity: 0.25;
   transform: rotate(22deg);
   mix-blend-mode: screen;
@@ -916,9 +914,9 @@ textarea {
 }
 
 .auth-decor--stars-right {
-  right: 180px;
-  bottom: 40px;
-  width: 140px;
+  left: 854px;
+  top: 652px;
+  width: 108px;
   opacity: 0.15;
   transform: rotate(18deg);
   mix-blend-mode: screen;
@@ -943,10 +941,13 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  width: min(100%, 600px);
+  width: 600px;
   min-height: 483px;
-  position: relative;
+  position: absolute;
   z-index: 2;
+  left: 50%;
+  top: 128px;
+  transform: translateX(-50%);
 }
 
 .auth-panel__header {
@@ -1123,21 +1124,13 @@ textarea {
 
 .polaroid--left {
   position: absolute;
-  left: -16px;
-  top: 245px;
+  left: -54px;
+  top: 177px;
   transform: rotate(-14.17deg);
 }
 
 .polaroid--left::before {
   content: none;
-}
-
-.polaroid-stack {
-  position: absolute;
-  right: -24px;
-  top: 130px;
-  width: 330px;
-  height: 620px;
 }
 
 .polaroid--right {
@@ -1149,20 +1142,22 @@ textarea {
 
 .polaroid--rear {
   position: absolute;
-  right: 0;
-  top: 40px;
+  left: 1048px;
+  top: 177px;
   transform: rotate(15.12deg);
+  z-index: 2;
 }
 
 .polaroid--front {
   position: absolute;
-  left: 12px;
-  bottom: 120px;
+  left: 976px;
+  top: 378px;
   transform: rotate(-6.14deg);
   width: 273px;
   height: 330px;
   --polaroid-padding: 18px;
   --polaroid-bottom: 64px;
+  z-index: 3;
 }
 
 .polaroid--right::before {
@@ -1207,13 +1202,8 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .auth-board__body {
-    min-height: auto;
-    padding: 32px 0;
-  }
-
   .polaroid--left,
-  .polaroid-stack {
+  .polaroid--right {
     display: none;
   }
 
@@ -1223,6 +1213,9 @@ textarea {
 
   .auth-panel {
     width: min(100%, 520px);
+    left: 50%;
+    top: 120px;
+    transform: translateX(-50%);
   }
 }
 
