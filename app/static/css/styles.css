@@ -803,6 +803,7 @@ textarea {
   box-shadow: none;
   border: none;
   overflow: hidden;
+  z-index: 0;
   --auth-stage-width: 1920px;
   --auth-stage-height: 1080px;
   --auth-scale: min(calc(100vw / 1920px), calc(100vh / 1080px));
@@ -843,16 +844,22 @@ textarea {
 }
 
 .auth-board::before {
+  inset: auto;
+  width: 1280px;
+  height: 750px;
+  left: 0;
+  top: calc(50% - 375px - 188px);
   background-image: var(--auth-texture-main);
   mix-blend-mode: plus-lighter;
-  opacity: 0.9;
+  opacity: 1;
+  z-index: 1;
 }
 
 .auth-board::after {
   background-image: var(--auth-texture-paper);
-  mix-blend-mode: multiply;
-  opacity: 0.38;
-  filter: contrast(1.05);
+  mix-blend-mode: overlay;
+  opacity: 0.08;
+  z-index: 4;
 }
 
 .auth-topbar {
@@ -907,20 +914,25 @@ textarea {
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  width: 140px;
-  height: 140px;
-  overflow: visible;
+  width: 162px;
+  height: 177px;
+  overflow: hidden;
 }
 
 .auth-decor img {
-  width: 140px;
-  height: auto;
+  position: absolute;
+  width: 149px;
+  height: 127px;
+  left: 36px;
+  top: 31px;
   display: block;
+  object-fit: contain;
+  transform: rotate(100deg);
 }
 
 .auth-decor--stars-left {
-  left: 460px;
-  top: 238px;
+  left: 380.43px;
+  top: 257.61px;
   opacity: 0.8;
   transform: rotate(23.79deg);
   mix-blend-mode: screen;
@@ -929,17 +941,13 @@ textarea {
 }
 
 .auth-decor--stars-right {
-  left: 1235px;
-  top: 820px;
-  opacity: 0.35;
+  left: 1280.43px;
+  top: 907.61px;
+  opacity: 0.3;
   transform: rotate(23.79deg);
   mix-blend-mode: soft-light;
   filter: saturate(0.4);
   z-index: 0;
-}
-
-.auth-decor--stars-right img {
-  width: 120px;
 }
 
 .auth-decor--tape {
@@ -1077,8 +1085,8 @@ textarea {
   box-shadow:
     5.46px -4.25px 18.2px rgba(0, 0, 0, 0.15),
     1.3px 14.32px 31.25px rgba(0, 0, 0, 0.11);
-  --polaroid-padding: 24px;
-  --polaroid-bottom: 74px;
+  --polaroid-padding: 15px;
+  --polaroid-bottom: 56px;
   z-index: 2;
 }
 
@@ -1109,9 +1117,9 @@ textarea {
 
 .polaroid__clip {
   position: absolute;
-  left: -40px;
-  top: -62px;
-  width: 180px;
+  left: 20px;
+  top: -38px;
+  width: 120px;
   z-index: 3;
   pointer-events: none;
 }
@@ -1128,7 +1136,7 @@ textarea {
 
 .polaroid--left .polaroid__photo {
   --photo: var(--auth-photo-left);
-  background-position: 66% 30%;
+  background-position: 50% 30%;
 }
 
 .polaroid--rear .polaroid__photo {
@@ -1145,11 +1153,17 @@ textarea {
   position: absolute;
   --polaroid-width: 366px;
   --polaroid-height: 443px;
-  --polaroid-padding: 22px;
-  --polaroid-bottom: 74px;
-  left: 8px;
-  top: 410px;
-  transform: rotate(-14deg);
+  --polaroid-padding: 15px;
+  --polaroid-bottom: 56px;
+  left: -81px;
+  top: 410.32px;
+  transform: rotate(-14.17deg);
+}
+
+.polaroid--left .polaroid__clip {
+  left: 10px;
+  top: -144px;
+  width: 211px;
 }
 
 .polaroid--left::before {
@@ -1157,38 +1171,38 @@ textarea {
 }
 
 .polaroid--right {
-  --polaroid-padding: 18px;
-  --polaroid-bottom: 64px;
+  --polaroid-padding: 13px;
+  --polaroid-bottom: 48px;
 }
 
 .polaroid--rear {
   position: absolute;
   --polaroid-width: 315px;
   --polaroid-height: 381px;
-  --polaroid-padding: 18px;
-  --polaroid-bottom: 62px;
-  left: 1572px;
+  --polaroid-padding: 13px;
+  --polaroid-bottom: 48px;
+  left: 1572.5px;
   top: 211px;
-  transform: rotate(15deg);
+  transform: rotate(15.12deg);
   z-index: 2;
 }
 
 .polaroid--rear .polaroid__tape {
-  width: 95px;
-  left: calc(100% - 76px);
-  top: -22px;
-  transform: rotate(-6deg);
+  width: 115px;
+  left: 54px;
+  top: -72px;
+  transform: rotate(10deg);
 }
 
 .polaroid--front {
   position: absolute;
   --polaroid-width: 410px;
   --polaroid-height: 495px;
-  --polaroid-padding: 22px;
-  --polaroid-bottom: 80px;
+  --polaroid-padding: 12px;
+  --polaroid-bottom: 55px;
   left: 1464px;
-  top: 513px;
-  transform: rotate(-6deg);
+  top: 513.2px;
+  transform: rotate(-6.14deg);
   z-index: 3;
 }
 
