@@ -759,7 +759,7 @@ textarea {
 }
 
 .auth .main {
-  padding: 0;
+  padding: 28px 0 80px;
 }
 
 .auth .main__inner {
@@ -767,35 +767,32 @@ textarea {
 }
 
 .auth .container {
-  width: 100%;
-  margin: 0;
+  width: min(100% - 48px, 1280px);
+  margin: 0 auto;
 }
 
 .auth-shell {
-  width: 100%;
-  min-height: 100vh;
-  position: relative;
+  width: min(100% - 32px, 1280px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .auth-caption {
-  position: absolute;
-  top: 12px;
-  left: 24px;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #6f6f78;
   letter-spacing: 0.4px;
-  z-index: 2;
 }
 
 .auth-board {
   position: relative;
   padding: 0 24px 34px;
-  border-radius: 0;
+  border-radius: 24px;
   background: radial-gradient(51.96% 50% at 50% 50%, #d3bbff 0%, #8d73be 100%);
   box-shadow: 0 28px 60px rgba(34, 22, 64, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.25);
   overflow: hidden;
-  min-height: 100vh;
+  min-height: 750px;
   width: 100%;
 }
 
@@ -842,7 +839,6 @@ textarea {
   color: #ffffff;
   border-radius: 0 0 20px 20px;
   padding: 0 18px;
-  margin: 0 -24px;
   height: 68px;
   display: flex;
   align-items: center;
