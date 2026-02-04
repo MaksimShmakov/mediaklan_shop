@@ -1,25 +1,63 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block body_class %}auth auth--login{% endblock %}
 
 {% block content %}
-<section class="card panel">
-  <div class="panel__header">
-    <h1>Вход в магазин</h1>
-    <p>Используйте tg_username и пароль.</p>
+<section class="auth-shell">
+  <div class="auth-caption">Вход</div>
+  <div class="auth-board">
+    <div class="auth-topbar">
+      <div class="auth-brand">
+        <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
+        <span class="auth-brand__name">медийный клан</span>
+        <span class="auth-brand__pill">SHOP</span>
+      </div>
+    </div>
+
+    <img class="auth-decor auth-decor--stars-left" src="/static/img/auth/stars.png" alt="" aria-hidden="true" />
+    <img class="auth-decor auth-decor--stars-right" src="/static/img/auth/stars.png" alt="" aria-hidden="true" />
+    <img class="auth-decor auth-decor--tape" src="/static/img/auth/tape-cross.png" alt="" aria-hidden="true" />
+
+    <div class="auth-board__body">
+      <div class="polaroid polaroid--left" aria-hidden="true">
+        <div class="polaroid__photo"></div>
+        <img class="polaroid__frame" src="/static/img/auth/polaroid-frame.png" alt="" aria-hidden="true" />
+        <img class="polaroid__clip" src="/static/img/auth/binder-clip.png" alt="" aria-hidden="true" />
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-panel__header">
+          <h1>Вход в магазин</h1>
+          <p>Используйте <span>tg_username</span> и пароль</p>
+        </div>
+        <form class="form auth-form" method="post" action="/login">
+          <label class="field">
+            <span>tg_username</span>
+            <input type="text" name="tg_username" placeholder="@egeland_the_best" required />
+          </label>
+          <label class="field">
+            <span>Пароль</span>
+            <input type="password" name="password" required />
+          </label>
+          {% if error %}
+          <div class="alert">{{ error }}</div>
+          {% endif %}
+          <button class="btn" type="submit">Продолжить</button>
+          <a class="ghost" href="/register">Нет аккаунта? Регистрация</a>
+        </form>
+      </div>
+
+      <div class="polaroid-stack" aria-hidden="true">
+        <div class="polaroid polaroid--right polaroid--rear">
+          <div class="polaroid__photo"></div>
+          <img class="polaroid__frame" src="/static/img/auth/polaroid-frame.png" alt="" aria-hidden="true" />
+        </div>
+        <div class="polaroid polaroid--right polaroid--front">
+          <div class="polaroid__photo"></div>
+          <img class="polaroid__frame" src="/static/img/auth/polaroid-frame.png" alt="" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
   </div>
-  <form class="form" method="post" action="/login">
-    <label class="field">
-      <span>tg_username</span>
-      <input type="text" name="tg_username" placeholder="@egeland_the_best" required />
-    </label>
-    <label class="field">
-      <span>Пароль</span>
-      <input type="password" name="password" required />
-    </label>
-    {% if error %}
-    <div class="alert">{{ error }}</div>
-    {% endif %}
-    <button class="btn" type="submit">Продолжить</button>
-    <a class="ghost" href="/register">Нет аккаунта? Регистрация</a>
-  </form>
 </section>
 {% endblock %}
