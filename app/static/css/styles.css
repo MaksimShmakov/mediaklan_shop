@@ -751,6 +751,7 @@ textarea {
   --auth-texture-main: none;
   --auth-texture-paper: none;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .auth .bg-orbs,
@@ -761,6 +762,7 @@ textarea {
 
 .auth .main {
   padding: 0;
+  min-height: 100vh;
 }
 
 .auth .main__inner {
@@ -768,6 +770,7 @@ textarea {
   min-height: 100vh;
   width: 100%;
   padding: 0;
+  max-width: 100%;
 }
 
 .auth .container {
@@ -778,7 +781,7 @@ textarea {
 }
 
 .auth-shell {
-  width: 100%;
+  width: 100vw;
   min-height: 100vh;
   position: relative;
 }
@@ -796,7 +799,9 @@ textarea {
   border: none;
   overflow: hidden;
   min-height: 100vh;
-  width: 100%;
+  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .auth--login .auth-board {
