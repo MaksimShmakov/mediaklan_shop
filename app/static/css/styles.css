@@ -799,7 +799,7 @@ textarea {
   height: 100vh;
   padding: 0;
   border-radius: 0;
-  background: radial-gradient(51.96% 50% at 50% 50%, #d3bbff 0%, #8d73be 100%);
+  background-color: #8d73be;
   box-shadow: none;
   border: none;
   overflow: hidden;
@@ -820,46 +820,15 @@ textarea {
 }
 
 .auth--login .auth-board {
-  --auth-texture-main: url("/static/img/auth/AU-FG-Texture1-8K.jpg");
-  --auth-texture-paper: url("/static/img/auth/DESIGNSYNDROME-PAPERCUT-TEXTURE---TRANSPARENT59.png");
-  --auth-photo-left: url("/static/img/auth/photo-left.png");
-  --auth-photo-top: url("/static/img/auth/photo-top.png");
-  --auth-photo-bottom: url("/static/img/auth/photo-bottom.jpg");
-  --auth-frame: url("/static/img/auth/polaroid-frame.png");
-  --auth-clip: url("/static/img/auth/binder-clip.png");
-  --auth-tape: url("/static/img/auth/tape-cross.png");
-  --auth-stars: url("/static/img/auth/star.png");
+  background-image: url("/static/img/auth/exit-background-without.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .auth-board::before,
 .auth-board::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-}
-
-.auth-board::before {
-  inset: auto;
-  width: 1280px;
-  height: 750px;
-  left: 0;
-  top: calc(50% - 375px - 188px);
-  background-image: var(--auth-texture-main);
-  mix-blend-mode: plus-lighter;
-  opacity: 1;
-  z-index: 1;
-}
-
-.auth-board::after {
-  background-image: var(--auth-texture-paper);
-  mix-blend-mode: overlay;
-  opacity: 0.08;
-  z-index: 4;
+  content: none;
 }
 
 .auth-topbar {
