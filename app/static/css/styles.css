@@ -1027,6 +1027,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 26px;
+  justify-items: center;
 }
 
 .shop-tile {
@@ -1043,6 +1044,8 @@ textarea {
   display: block;
   box-sizing: border-box;
   position: relative;
+  width: 705px;
+  height: 477px;
 }
 
 .shop-tile--regular {
@@ -1050,7 +1053,7 @@ textarea {
 }
 
 .shop-tile--regular .shop-tile__surface {
-  background: url("/static/img/register/card-shop.png") center/contain no-repeat;
+  background: url("/static/img/common/mk-shop.png") center/contain no-repeat;
   color: #5b7de9;
 }
 
@@ -1059,7 +1062,7 @@ textarea {
 }
 
 .shop-tile--premium .shop-tile__surface {
-  background: url("/static/img/register/card-premium-shop.png") center/contain no-repeat;
+  background: url("/static/img/common/mk-shop-premium.png") center/contain no-repeat;
   border: none;
   color: #e4e9ff;
 }
@@ -1082,18 +1085,29 @@ textarea {
 }
 
 .shop-tile__time {
-  display: none;
+  position: absolute;
+  left: 360px;
+  top: 196px;
+  display: flex;
+  align-items: center;
 }
 
 .shop-tile__label {
-  letter-spacing: 0.6px;
+  display: none;
 }
 
 .shop-tile__time-pill {
-  padding: 6px 16px;
+  width: 160px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
   border-radius: 999px;
   background: rgba(91, 125, 233, 0.35);
   font-weight: 600;
+  font-size: 21px;
+  color: #e4e9ff;
 }
 
 .shop-tile--premium .shop-tile__time-pill {
@@ -1111,11 +1125,13 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  width: 187px;
+  height: 44px;
+  padding: 0 12px;
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 21px;
   text-decoration: none;
 }
 
@@ -1451,8 +1467,13 @@ textarea {
   }
 
   .shop-tile__surface {
-    padding: 28px;
-    min-height: auto;
+    transform: scale(0.75);
+    transform-origin: top left;
+  }
+
+  .shop-tile {
+    width: 530px;
+    height: 358px;
   }
 
   .auth-panel__header h1 {
@@ -1560,10 +1581,16 @@ textarea {
   }
 
   .shop-tile__surface {
-    padding: 22px;
+    transform: scale(0.62);
+    transform-origin: top left;
   }
 
   .shop-tile__time {
     font-size: 0.95rem;
+  }
+
+  .shop-tile {
+    width: 438px;
+    height: 296px;
   }
 }
