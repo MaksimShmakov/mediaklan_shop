@@ -817,11 +817,6 @@ textarea {
   top: 50%;
   transform: translate(-50%, -50%) scale(var(--auth-scale));
   transform-origin: center;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 192px;
-  box-sizing: border-box;
 }
 
 .auth--login .auth-board,
@@ -944,12 +939,11 @@ textarea {
   gap: 22px;
   width: 900px;
   min-height: 725px;
-  position: relative;
+  position: absolute;
   z-index: 2;
-  left: auto;
-  top: auto;
-  transform: none;
-  margin: 0 auto;
+  left: 50%;
+  top: 192px;
+  transform: translateX(-50%);
 }
 
 .auth-panel__header {
