@@ -1038,60 +1038,51 @@ textarea {
 
 .shop-tile__surface {
   border-radius: 38px;
-  padding: 40px 44px;
-  min-height: 426px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+  padding: 0;
+  min-height: 0;
+  display: block;
   box-sizing: border-box;
+  position: relative;
 }
 
 .shop-tile--regular {
-  background: #6c86f2;
+  background: transparent;
 }
 
 .shop-tile--regular .shop-tile__surface {
-  background: url("/static/img/register/card-shop.png") center/cover no-repeat;
+  background: url("/static/img/register/card-shop.png") center/contain no-repeat;
   color: #5b7de9;
 }
 
 .shop-tile--premium {
-  background: #e4e9ff;
+  background: transparent;
 }
 
 .shop-tile--premium .shop-tile__surface {
-  background: url("/static/img/register/card-premium-shop.png") center/cover no-repeat;
+  background: url("/static/img/register/card-premium-shop.png") center/contain no-repeat;
   border: none;
   color: #e4e9ff;
 }
 
 .shop-tile__brand {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  display: none;
 }
 
 .shop-tile__brand-main {
   font-family: "Druk Cyr", "Oswald", sans-serif;
-  font-size: clamp(2.6rem, 3.4vw, 4.2rem);
+  font-size: 64px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .shop-tile__brand-script {
   font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
-  font-size: clamp(2rem, 2.8vw, 3.2rem);
+  font-size: 52px;
   font-style: italic;
 }
 
 .shop-tile__time {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px;
-  text-transform: uppercase;
-  font-family: "Inter", sans-serif;
-  font-size: clamp(1rem, 1.4vw, 1.4rem);
+  display: none;
 }
 
 .shop-tile__label {
@@ -1101,7 +1092,7 @@ textarea {
 .shop-tile__time-pill {
   padding: 6px 16px;
   border-radius: 999px;
-  background: rgba(91, 125, 233, 0.25);
+  background: rgba(91, 125, 233, 0.35);
   font-weight: 600;
 }
 
@@ -1111,18 +1102,20 @@ textarea {
 }
 
 .shop-tile__status {
-  margin-top: auto;
+  position: absolute;
+  left: 52px;
+  bottom: 36px;
 }
 
 .shop-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 18px;
   text-decoration: none;
 }
 
