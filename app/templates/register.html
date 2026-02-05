@@ -1,29 +1,45 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block body_class %}auth auth--register{% endblock %}
 
 {% block content %}
-<section class="card panel">
-  <div class="panel__header">
-    <h1>Регистрация</h1>
-    <p>Создайте пароль, чтобы входить в магазин.</p>
+<section class="auth-shell">
+  <div class="auth-board">
+    <div class="auth-stage">
+      <div class="auth-topbar">
+        <div class="auth-brand">
+          <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
+          <span class="auth-brand__name">Медийный клан</span>
+          <span class="auth-brand__pill">SHOP</span>
+        </div>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-panel__header">
+          <h1>Регистрация</h1>
+          <p>Создайте пароль, чтобы входить в магазин</p>
+        </div>
+        <form class="form auth-form" method="post" action="/register">
+          <label class="field">
+            <span>tg_username</span>
+            <input type="text" name="tg_username" placeholder="@egeland_the_best" required />
+          </label>
+          <label class="field">
+            <span>Пароль</span>
+            <input type="password" name="password" required />
+          </label>
+          <label class="field">
+            <span>Повторите пароль</span>
+            <input type="password" name="password_confirm" required />
+          </label>
+          {% if error %}
+          <div class="alert">{{ error }}</div>
+          {% endif %}
+          <button class="btn" type="submit">Создать аккаунт</button>
+          <a class="ghost" href="/login">Уже есть аккаунт? Войти</a>
+        </form>
+      </div>
+    </div>
   </div>
-  <form class="form" method="post" action="/register">
-    <label class="field">
-      <span>tg_username</span>
-      <input type="text" name="tg_username" placeholder="@egeland_the_best" required />
-    </label>
-    <label class="field">
-      <span>Пароль</span>
-      <input type="password" name="password" required />
-    </label>
-    <label class="field">
-      <span>Повторите пароль</span>
-      <input type="password" name="password_confirm" required />
-    </label>
-    {% if error %}
-    <div class="alert">{{ error }}</div>
-    {% endif %}
-    <button class="btn" type="submit">Создать аккаунт</button>
-    <a class="ghost" href="/login">Уже есть аккаунт? Войти</a>
-  </form>
 </section>
 {% endblock %}

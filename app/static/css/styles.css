@@ -819,7 +819,8 @@ textarea {
   transform-origin: center;
 }
 
-.auth--login .auth-board {
+.auth--login .auth-board,
+.auth--register .auth-board {
   background-image: url("/static/img/auth/exit-background-without.png");
   background-repeat: no-repeat;
   background-position: center;
