@@ -1013,11 +1013,14 @@ textarea {
 }
 
 .shop-hero__script {
-  margin-top: 6px;
-  font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
-  font-size: clamp(2rem, 4vw, 4.2rem);
-  color: #9574c7;
-  font-style: italic;
+  display: none;
+}
+
+.shop-hero__script-img {
+  display: block;
+  width: min(840px, 80%);
+  height: auto;
+  margin: 6px auto 0;
 }
 
 .shop-grid {
@@ -1028,14 +1031,15 @@ textarea {
 
 .shop-tile {
   border-radius: 48px;
-  padding: 20px;
+  padding: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .shop-tile__surface {
   border-radius: 38px;
-  padding: 38px 40px;
-  min-height: 360px;
+  padding: 40px 44px;
+  min-height: 426px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -1043,21 +1047,21 @@ textarea {
 }
 
 .shop-tile--regular {
-  background: linear-gradient(132deg, #6c86f2 12%, #4f6ad8 96%);
+  background: #6c86f2;
 }
 
 .shop-tile--regular .shop-tile__surface {
-  background: #e4e9ff;
+  background: url("/static/img/register/card-shop.png") center/cover no-repeat;
   color: #5b7de9;
 }
 
 .shop-tile--premium {
-  background: linear-gradient(182deg, #e4e9ff 6%, #4f6ad8 56%);
+  background: #e4e9ff;
 }
 
 .shop-tile--premium .shop-tile__surface {
-  background: #2a2a29;
-  border: 1.5px solid #5b7de9;
+  background: url("/static/img/register/card-premium-shop.png") center/cover no-repeat;
+  border: none;
   color: #e4e9ff;
 }
 
@@ -1474,6 +1478,10 @@ textarea {
     font-size: 2rem;
   }
 
+  .shop-hero__script-img {
+    width: min(520px, 80%);
+  }
+
   .auth-form .field span,
   .auth-form .field input {
     font-size: 1rem;
@@ -1552,6 +1560,10 @@ textarea {
 
   .shop-hero__script {
     font-size: 1.7rem;
+  }
+
+  .shop-hero__script-img {
+    width: min(420px, 82%);
   }
 
   .shop-tile__surface {
