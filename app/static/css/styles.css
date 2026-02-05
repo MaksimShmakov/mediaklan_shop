@@ -1023,6 +1023,13 @@ textarea {
   margin: 6px auto 0;
 }
 
+.shop-hero__headline {
+  display: block;
+  width: min(1084px, 88%);
+  height: auto;
+  margin: 0 auto 8px;
+}
+
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1086,8 +1093,8 @@ textarea {
 
 .shop-tile__time {
   position: absolute;
-  left: 360px;
-  top: 196px;
+  left: 368px;
+  top: 198px;
   display: flex;
   align-items: center;
 }
@@ -1106,7 +1113,7 @@ textarea {
   border-radius: 999px;
   background: rgba(91, 125, 233, 0.35);
   font-weight: 600;
-  font-size: 21px;
+  font-size: 20px;
   color: #e4e9ff;
 }
 
@@ -1131,7 +1138,7 @@ textarea {
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 21px;
+  font-size: 20px;
   text-decoration: none;
 }
 
@@ -1496,6 +1503,10 @@ textarea {
     width: min(520px, 80%);
   }
 
+  .shop-hero__headline {
+    width: min(820px, 92%);
+  }
+
   .auth-form .field span,
   .auth-form .field input {
     font-size: 1rem;
@@ -1578,6 +1589,10 @@ textarea {
 
   .shop-hero__script-img {
     width: min(420px, 82%);
+  }
+
+  .shop-hero__headline {
+    width: min(640px, 94%);
   }
 
   .shop-tile__surface {
