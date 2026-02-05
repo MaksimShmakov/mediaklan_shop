@@ -820,7 +820,8 @@ textarea {
 }
 
 .auth--login .auth-board,
-.auth--register .auth-board {
+.auth--register .auth-board,
+.auth--shops .auth-board {
   background-image: url("/static/img/auth/exit-background-without.png");
   background-repeat: no-repeat;
   background-position: center;
@@ -971,6 +972,184 @@ textarea {
 .auth-panel__header span {
   color: #7c63c4;
   font-weight: 500;
+}
+
+.shop-shell {
+  color: #2a2a29;
+}
+
+.shop-panel {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 51px);
+  transform: translate(-50%, -50%);
+  width: min(1560px, calc(100vw - 140px));
+  min-height: 740px;
+  background: #ffffff;
+  border-radius: 45px;
+  padding: 56px 60px 64px;
+  box-shadow:
+    -6px 21px 49.5px rgba(49, 18, 107, 0.1),
+    -25.5px 85.5px 88.5px rgba(39, 15, 83, 0.09),
+    -58.5px 192px 120px rgba(136, 113, 179, 0.05),
+    -103.5px 340.5px 142.5px rgba(39, 17, 80, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+.shop-hero {
+  text-align: center;
+}
+
+.shop-hero h1 {
+  margin: 0;
+  font-family: "Druk Cyr", "Oswald", sans-serif;
+  font-size: clamp(2.6rem, 4.8vw, 5.6rem);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 0.95;
+  color: #2a2a29;
+}
+
+.shop-hero__script {
+  margin-top: 6px;
+  font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  color: #9574c7;
+  font-style: italic;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.shop-tile {
+  border-radius: 48px;
+  padding: 20px;
+  position: relative;
+}
+
+.shop-tile__surface {
+  border-radius: 38px;
+  padding: 38px 40px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  box-sizing: border-box;
+}
+
+.shop-tile--regular {
+  background: linear-gradient(132deg, #6c86f2 12%, #4f6ad8 96%);
+}
+
+.shop-tile--regular .shop-tile__surface {
+  background: #e4e9ff;
+  color: #5b7de9;
+}
+
+.shop-tile--premium {
+  background: linear-gradient(182deg, #e4e9ff 6%, #4f6ad8 56%);
+}
+
+.shop-tile--premium .shop-tile__surface {
+  background: #2a2a29;
+  border: 1.5px solid #5b7de9;
+  color: #e4e9ff;
+}
+
+.shop-tile__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.shop-tile__brand-main {
+  font-family: "Druk Cyr", "Oswald", sans-serif;
+  font-size: clamp(2.6rem, 3.4vw, 4.2rem);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.shop-tile__brand-script {
+  font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
+  font-size: clamp(2rem, 2.8vw, 3.2rem);
+  font-style: italic;
+}
+
+.shop-tile__time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  text-transform: uppercase;
+  font-family: "Inter", sans-serif;
+  font-size: clamp(1rem, 1.4vw, 1.4rem);
+}
+
+.shop-tile__label {
+  letter-spacing: 0.6px;
+}
+
+.shop-tile__time-pill {
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(91, 125, 233, 0.25);
+  font-weight: 600;
+}
+
+.shop-tile--premium .shop-tile__time-pill {
+  background: #e4e9ff;
+  color: #5b7de9;
+}
+
+.shop-tile__status {
+  margin-top: auto;
+}
+
+.shop-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.shop-pill--open {
+  background: #5b7de9;
+  color: #e4e9ff;
+}
+
+.shop-pill--closed {
+  background: rgba(91, 125, 233, 0.3);
+  color: #e4e9ff;
+}
+
+.shop-tile--regular .shop-pill--closed {
+  background: rgba(91, 125, 233, 0.3);
+  color: #e4e9ff;
+}
+
+.shop-tile--regular .shop-pill--open {
+  background: #5b7de9;
+  color: #e4e9ff;
+}
+
+.shop-tile--premium .shop-pill--open {
+  background: #5b7de9;
+  color: #e4e9ff;
+}
+
+.shop-tile--premium .shop-pill--closed {
+  background: rgba(91, 125, 233, 0.35);
+  color: #e4e9ff;
 }
 
 .auth-form {
@@ -1258,12 +1437,41 @@ textarea {
     margin: 32px auto 48px;
   }
 
+  .shop-panel {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: min(calc(100% - 32px), 920px);
+    margin: 32px auto 48px;
+    padding: 36px 28px 40px;
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-tile__surface {
+    padding: 28px;
+    min-height: auto;
+  }
+
   .auth-panel__header h1 {
     font-size: 3rem;
   }
 
   .auth-panel__header p {
     font-size: 1.1rem;
+  }
+
+  .shop-hero h1 {
+    font-size: 2.6rem;
+  }
+
+  .shop-hero__script {
+    font-size: 2rem;
   }
 
   .auth-form .field span,
@@ -1332,5 +1540,25 @@ textarea {
   .auth-panel .btn,
   .auth-panel .ghost {
     font-size: 1rem;
+  }
+
+  .shop-panel {
+    padding: 24px 20px 32px;
+  }
+
+  .shop-hero h1 {
+    font-size: 2.1rem;
+  }
+
+  .shop-hero__script {
+    font-size: 1.7rem;
+  }
+
+  .shop-tile__surface {
+    padding: 22px;
+  }
+
+  .shop-tile__time {
+    font-size: 0.95rem;
   }
 }

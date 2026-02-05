@@ -1,39 +1,64 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block body_class %}auth auth--shops{% endblock %}
 
 {% block content %}
-<section class="hero">
-  <div>
-    <h1>ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН МЕДИАКЛАНА</h1>
-  </div>
-</section>
+<section class="auth-shell shop-shell">
+  <div class="auth-board">
+    <div class="auth-stage">
+      <div class="auth-topbar">
+        <div class="auth-brand">
+          <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
+          <span class="auth-brand__name">Медийный клан</span>
+          <span class="auth-brand__pill">SHOP</span>
+        </div>
+      </div>
 
-<section class="grid">
-  {% for shop_type in ["regular", "premium"] %}
-  {% set state = status_map[shop_type] %}
-  <article class="card shop-card">
-    <div class="shop-card__head">
-      <h2>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h2>
-      {% if state.open %}
-      <span class="chip chip--open">Открыт</span>
-      {% else %}
-      <span class="chip chip--closed">Закрыт</span>
-      {% endif %}
+      <div class="shop-panel">
+        <div class="shop-hero">
+          <h1>ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН</h1>
+          <div class="shop-hero__script">Медийного Клана!</div>
+        </div>
+
+        <div class="shop-grid">
+          {% for shop_type in ["regular", "premium"] %}
+          {% set state = status_map[shop_type] %}
+          <article class="shop-tile {{ 'shop-tile--regular' if shop_type == 'regular' else 'shop-tile--premium' }}">
+            <div class="shop-tile__surface">
+              <div class="shop-tile__brand">
+                {% if shop_type == "regular" %}
+                <span class="shop-tile__brand-main">MK</span>
+                <span class="shop-tile__brand-script">Shop</span>
+                {% else %}
+                <span class="shop-tile__brand-main">PREMIUM</span>
+                <span class="shop-tile__brand-script">Shop</span>
+                {% endif %}
+              </div>
+
+              <div class="shop-tile__time">
+                <span class="shop-tile__label">Время открытия:</span>
+                <span class="shop-tile__time-pill">
+                  {% if state.opens_at %}
+                  {{ state.opens_at.strftime('%d.%m %H:%M') }}
+                  {% else %}
+                  скоро
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="shop-tile__status">
+                {% if state.allowed %}
+                <a class="shop-pill shop-pill--open" href="/shop/{{ shop_type }}">Доступ открыт</a>
+                {% else %}
+                <span class="shop-pill shop-pill--closed">Доступ закрыт</span>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
     </div>
-    <p class="muted">
-      {% if state.opens_at and state.closes_at %}
-      Окно продаж: {{ state.opens_at.strftime('%d.%m %H:%M') }} — {{ state.closes_at.strftime('%d.%m %H:%M') }}
-      {% else %}
-      Окно продаж еще не настроено.
-      {% endif %}
-    </p>
-    <div class="shop-card__actions">
-      {% if state.allowed %}
-      <a class="btn" href="/shop/{{ shop_type }}">Перейти</a>
-      {% else %}
-      <span class="pill pill--muted">Доступ закрыт</span>
-      {% endif %}
-    </div>
-  </article>
-  {% endfor %}
+  </div>
 </section>
 {% endblock %}
