@@ -832,15 +832,15 @@ textarea {
 }
 
 .auth-topbar {
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
-  width: 1920px;
+  width: 100vw;
   z-index: 1;
   background: #1d1c1d;
   color: #ffffff;
   border-radius: 0 0 30px 30px;
-  padding: 0 159px;
+  padding: 0 clamp(24px, 6vw, 159px);
   height: 102px;
   display: flex;
   align-items: center;
