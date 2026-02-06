@@ -1099,13 +1099,13 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .store-hero__title {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -1150,7 +1150,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  margin-top: 10px;
+  margin-top: 16px;
   justify-items: center;
 }
 
@@ -1183,8 +1183,8 @@ textarea {
 }
 
 .store-card__frame img {
-  width: 95%;
-  height: 95%;
+  width: 85%;
+  height: 85%;
   object-fit: contain;
 }
 
@@ -1197,10 +1197,12 @@ textarea {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #7b66c5;
-  background: transparent;
+  background: #ede5fc;
+  border: 1px solid #e3d8f4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   z-index: 2;
 }
 
@@ -1228,7 +1230,7 @@ textarea {
   margin: 0;
   font-family: "Druk Cyr", "Oswald", sans-serif;
   text-transform: uppercase;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   line-height: 1.1;
   letter-spacing: 0.5px;
   color: #2b2b2b;
