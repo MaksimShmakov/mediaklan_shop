@@ -44,12 +44,20 @@ body {
 }
 
 .shop-view {
-  background: #8d73be url("/static/img/shop/vitrina-mk.png") center top / cover no-repeat;
+  background: #8d73be;
   color: #2b2b2b;
   --auth-stage-width: 1920px;
   --auth-stage-height: 1080px;
   --auth-scale: min(calc(100vw / 1920px), calc(100vh / 1080px));
   --auth-topbar-height: calc(102px * var(--auth-scale));
+}
+
+.shop-view--regular {
+  background: #8d73be url("/static/img/shop/vitrina-mk.png") center top / cover no-repeat;
+}
+
+.shop-view--premium {
+  background: #8d73be url("/static/img/shop/vitrina-prem.png") center top / cover no-repeat;
 }
 
 .shop-view .shop-topbar-stage {
@@ -1194,10 +1202,20 @@ textarea {
 }
 
 .store-hero__headline {
-  width: 659px;
   height: 186px;
-  background: url("/static/img/shop/text-shop-new.png") center/contain no-repeat;
+  max-width: 100%;
+  background: center/contain no-repeat;
   margin-bottom: var(--store-hero-gap, 48px);
+}
+
+.shop-view--regular .store-hero__headline {
+  width: 659px;
+  background-image: url("/static/img/shop/text-shop-new.png");
+}
+
+.shop-view--premium .store-hero__headline {
+  width: 867px;
+  background-image: url("/static/img/shop/text-shop-premium.png");
 }
 
 .store-panel {
