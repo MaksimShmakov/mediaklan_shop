@@ -15,8 +15,8 @@
     />
     <link rel="stylesheet" href="/static/css/styles.css" />
   </head>
-  {% set body_class = (self.body_class() | trim) %}
-  <body class="{{ body_class }}">
+  {% set body_class %}{% block body_class %}{% endblock %}{% endset %}
+  <body class="{{ body_class | trim }}">
     <div class="bg-orbs"></div>
     {% if "shop-view" in body_class %}
     <div class="shop-topbar-stage">
