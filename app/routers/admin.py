@@ -75,7 +75,7 @@ def admin_dashboard(
         products_by_shop[product.shop_type].append(product)
 
     users = db.execute(
-        select(User).order_by(User.points.desc()).limit(15)
+        select(User).order_by(User.points.desc())
     ).scalars().all()
     filters, resolved_status, _, _ = build_order_filters(
         status, date_from, date_to
