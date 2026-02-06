@@ -19,6 +19,18 @@
   box-sizing: border-box;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   margin: 0;
   font-family: "Manrope", sans-serif;
@@ -1019,31 +1031,13 @@ textarea {
   width: 1084px;
 }
 
-.shop-hero h1 {
-  margin: 0;
-  font-family: "Druk Cyr", "Oswald", sans-serif;
-  font-size: 96px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 0.9;
-  color: #2a2a29;
-}
-
-.shop-hero__script {
-  margin-top: -6px;
-  font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
-  font-size: 84px;
-  font-style: italic;
-  color: #9574c7;
-  line-height: 0.9;
+.shop-hero__headline {
+  width: 1084px;
+  height: 219px;
+  margin: 0 auto;
+  background: url("/static/img/common/thetext.png") center/contain no-repeat;
   user-select: none;
   pointer-events: none;
-  text-shadow:
-    -3px -3px 0 #ffffff,
-    3px -3px 0 #ffffff,
-    -3px 3px 0 #ffffff,
-    3px 3px 0 #ffffff,
-    0 0 6px #ffffff;
 }
 
 .shop-grid {
@@ -1518,12 +1512,10 @@ textarea {
     font-size: 1.1rem;
   }
 
-  .shop-hero h1 {
-    font-size: 3rem;
-  }
-
-  .shop-hero__script {
-    font-size: 2.2rem;
+  .shop-hero__headline {
+    width: min(820px, 92%);
+    height: auto;
+    aspect-ratio: 1084 / 219;
   }
 
   .shop-hero {
@@ -1606,12 +1598,10 @@ textarea {
     padding: 24px 20px 32px;
   }
 
-  .shop-hero h1 {
-    font-size: 2.4rem;
-  }
-
-  .shop-hero__script {
-    font-size: 1.8rem;
+  .shop-hero__headline {
+    width: min(640px, 94%);
+    height: auto;
+    aspect-ratio: 1084 / 219;
   }
 
   .shop-tile__surface {
