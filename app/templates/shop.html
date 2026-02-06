@@ -4,62 +4,75 @@
 
 {% block content %}
 <section class="store-hero">
-  <div>
-    <h1>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h1>
-    <p>Баллы списываются мгновенно. После покупки мы напишем в Telegram.</p>
+  <div class="store-hero__title">
+    <div class="store-hero__headline">
+      <span class="sr-only">Товары {{ "MK" if shop_type == "regular" else "Premium" }} Shop</span>
+    </div>
+    <p>Выбирай позицию и кликай <span>«Купить товар»</span></p>
   </div>
 </section>
 
-{% if not allowed %}
-<section class="store-message">
-  <h2>Доступ закрыт</h2>
-  <p>Редакторы пока не открыли для вас этот магазин. Если это ошибка — напишите куратору.</p>
-</section>
-{% elif not open_now %}
-<section class="store-message">
-  <h2>Магазин в данный момент не работает</h2>
-  <p>
-    {% if settings and settings.opens_at and settings.closes_at %}
-    Окно продаж: {{ settings.opens_at.strftime('%d.%m %H:%M') }} — {{ settings.closes_at.strftime('%d.%m %H:%M') }}
-    {% else %}
-    Время работы еще не настроено.
-    {% endif %}
-  </p>
-</section>
-{% else %}
-<section class="store-grid">
-  {% for product in products %}
-  {% set active_variants = product.variants | selectattr('active') | list %}
-  {% set variant = active_variants[0] if active_variants else None %}
-  {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
-  <article class="store-card">
-    <div class="store-card__media">
-      <span class="store-card__qty">{{ stock_value }} шт</span>
-      {% if product.image_url %}
-      <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+<section class="store-panel">
+  <div class="store-hero">
+    <div class="store-hero__title">
+      <div class="store-hero__headline">
+        <span class="sr-only">Товары {{ "MK" if shop_type == "regular" else "Premium" }} Shop</span>
+      </div>
+      <p>Выбирай позицию и кликай <span>«Купить товар»</span></p>
+    </div>
+  </div>
+
+  {% if not allowed %}
+  <section class="store-message">
+    <h2>Доступ закрыт</h2>
+    <p>Редакторы пока не открыли для вас этот магазин. Если это ошибка — напишите куратору.</p>
+  </section>
+  {% elif not open_now %}
+  <section class="store-message">
+    <h2>Магазин в данный момент не работает</h2>
+    <p>
+      {% if settings and settings.opens_at and settings.closes_at %}
+      Окно продаж: {{ settings.opens_at.strftime('%d.%m %H:%M') }} — {{ settings.closes_at.strftime('%d.%m %H:%M') }}
       {% else %}
-      <div class="image-placeholder">Фото</div>
+      Время работы еще не настроено.
       {% endif %}
+    </p>
+  </section>
+  {% else %}
+  <section class="store-grid">
+    {% for product in products %}
+    {% set active_variants = product.variants | selectattr('active') | list %}
+    {% set variant = active_variants[0] if active_variants else None %}
+    {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
+    <article class="store-card">
+      <div class="store-card__shell">
+        <div class="store-card__qty">{{ stock_value }} шт</div>
+      <div class="store-card__frame">
+        {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+        {% else %}
+        <div class="image-placeholder">Фото</div>
+        {% endif %}
+      </div>
       {% if variant %}
-      <span class="store-card__price">{{ variant.points_cost }} баллов</span>
+      <div class="store-card__price">{{ variant.points_cost }} баллов</div>
       {% endif %}
-    </div>
-    <div class="store-card__body">
-      <h3>{{ product.title }}</h3>
-      <p class="store-card__desc">{{ product.description or "" }}</p>
-      <button
-        class="store-card__buy redeem-btn"
-        data-variant="{{ variant.id if variant else '' }}"
-        {% if not variant %}disabled{% endif %}
-        {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
-      >
-        Купить товар
-      </button>
-    </div>
-  </article>
-  {% endfor %}
+        <h3>{{ product.title }}</h3>
+        <p class="store-card__desc">{{ product.description or "" }}</p>
+        <button
+          class="store-card__buy redeem-btn"
+          data-variant="{{ variant.id if variant else '' }}"
+          {% if not variant %}disabled{% endif %}
+          {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
+        >
+          Купить товар
+        </button>
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
 </section>
-{% endif %}
 
 <div class="toast" id="toast"></div>
 {% endblock %}
