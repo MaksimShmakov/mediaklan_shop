@@ -1,7 +1,9 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block body_class %}shop-view{% endblock %}
 
 {% block content %}
-<section class="hero">
+<section class="store-hero">
   <div>
     <h1>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h1>
     <p>Баллы списываются мгновенно. После покупки мы напишем в Telegram.</p>
@@ -9,12 +11,12 @@
 </section>
 
 {% if not allowed %}
-<section class="card panel">
+<section class="store-message">
   <h2>Доступ закрыт</h2>
   <p>Редакторы пока не открыли для вас этот магазин. Если это ошибка — напишите куратору.</p>
 </section>
 {% elif not open_now %}
-<section class="card panel">
+<section class="store-message">
   <h2>Магазин в данный момент не работает</h2>
   <p>
     {% if settings and settings.opens_at and settings.closes_at %}
@@ -25,34 +27,36 @@
   </p>
 </section>
 {% else %}
-<section class="grid product-grid">
+<section class="store-grid">
   {% for product in products %}
   {% set active_variants = product.variants | selectattr('active') | list %}
-  {% set costs = active_variants | map(attribute='points_cost') | list %}
-  {% set variants_count = active_variants | length %}
-  <a class="card product-card product-card--link" href="/shop/{{ shop_type }}/product/{{ product.id }}">
-    <div class="product-card__media">
+  {% set variant = active_variants[0] if active_variants else None %}
+  {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
+  <article class="store-card">
+    <div class="store-card__media">
+      <span class="store-card__qty">{{ stock_value }} шт</span>
       {% if product.image_url %}
       <img src="{{ product.image_url }}" alt="{{ product.title }}" />
       {% else %}
       <div class="image-placeholder">Фото</div>
       {% endif %}
-    </div>
-    <div class="product-card__body">
-      <h3>{{ product.title }}</h3>
-      <p class="muted clamp-3">{{ product.description or "" }}</p>
-      {% if costs %}
-      <div class="product-card__meta">
-        {% if variants_count == 1 %}
-        <span class="pill pill--inline">{{ costs | min }} баллов</span>
-        {% elif variants_count > 1 %}
-        <span class="pill pill--inline">от {{ costs | min }} баллов</span>
-        <span class="pill pill--muted">{{ variants_count }} вариантов</span>
-        {% endif %}
-      </div>
+      {% if variant %}
+      <span class="store-card__price">{{ variant.points_cost }} баллов</span>
       {% endif %}
     </div>
-  </a>
+    <div class="store-card__body">
+      <h3>{{ product.title }}</h3>
+      <p class="store-card__desc">{{ product.description or "" }}</p>
+      <button
+        class="store-card__buy redeem-btn"
+        data-variant="{{ variant.id if variant else '' }}"
+        {% if not variant %}disabled{% endif %}
+        {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
+      >
+        Купить товар
+      </button>
+    </div>
+  </article>
   {% endfor %}
 </section>
 {% endif %}

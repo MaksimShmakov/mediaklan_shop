@@ -1,6 +1,6 @@
 ﻿const toast = document.getElementById("toast");
 
-const productCards = document.querySelectorAll(".product-card");
+const productCards = document.querySelectorAll(".product-card, .store-card");
 if (productCards.length) {
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(
