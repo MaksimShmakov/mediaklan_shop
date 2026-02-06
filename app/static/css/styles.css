@@ -981,25 +981,28 @@ textarea {
 .shop-panel {
   position: absolute;
   left: 50%;
-  top: calc(50% + 51px);
-  transform: translate(-50%, -50%);
-  width: min(1560px, calc(100vw - 140px));
-  min-height: 740px;
+  top: 192px;
+  transform: translateX(-50%);
+  width: 1560px;
+  height: 863px;
   background: #ffffff;
   border-radius: 45px;
-  padding: 56px 60px 64px;
+  padding: 0;
   box-shadow:
     -6px 21px 49.5px rgba(49, 18, 107, 0.1),
     -25.5px 85.5px 88.5px rgba(39, 15, 83, 0.09),
     -58.5px 192px 120px rgba(136, 113, 179, 0.05),
     -103.5px 340.5px 142.5px rgba(39, 17, 80, 0.01);
-  display: flex;
-  flex-direction: column;
-  gap: 42px;
+  display: block;
 }
 
 .shop-hero {
+  position: absolute;
+  left: 50%;
+  top: 60px;
+  transform: translateX(-50%);
   text-align: center;
+  width: 1084px;
 }
 
 .shop-hero h1 {
@@ -1025,16 +1028,17 @@ textarea {
 
 .shop-hero__headline {
   display: block;
-  width: min(1084px, 88%);
+  width: 1084px;
   height: auto;
   margin: 0 auto 8px;
 }
 
 .shop-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 26px;
-  justify-items: center;
+  position: absolute;
+  left: 60px;
+  top: 281px;
+  display: flex;
+  gap: 30px;
 }
 
 .shop-tile {
@@ -1042,6 +1046,8 @@ textarea {
   padding: 0;
   position: relative;
   overflow: hidden;
+  width: 705px;
+  height: 477px;
 }
 
 .shop-tile__surface {
@@ -1093,8 +1099,8 @@ textarea {
 
 .shop-tile__time {
   position: absolute;
-  left: 368px;
-  top: 198px;
+  left: 342px;
+  top: 206px;
   display: flex;
   align-items: center;
 }
@@ -1104,17 +1110,18 @@ textarea {
 }
 
 .shop-tile__time-pill {
-  width: 160px;
-  height: 38px;
+  width: 161px;
+  height: 35px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(91, 125, 233, 0.35);
+  background: #5b7de9;
   font-weight: 600;
   font-size: 20px;
   color: #e4e9ff;
+  line-height: 1;
 }
 
 .shop-tile--premium .shop-tile__time-pill {
@@ -1124,8 +1131,8 @@ textarea {
 
 .shop-tile__status {
   position: absolute;
-  left: 52px;
-  bottom: 36px;
+  left: 51px;
+  top: 383px;
 }
 
 .shop-pill {
@@ -1140,6 +1147,7 @@ textarea {
   font-weight: 500;
   font-size: 20px;
   text-decoration: none;
+  line-height: 1;
 }
 
 .shop-pill--open {
@@ -1148,13 +1156,13 @@ textarea {
 }
 
 .shop-pill--closed {
-  background: rgba(91, 125, 233, 0.3);
-  color: #e4e9ff;
+  background: rgb(187, 201, 248);
+  color: #ffffff;
 }
 
 .shop-tile--regular .shop-pill--closed {
-  background: rgba(91, 125, 233, 0.3);
-  color: #e4e9ff;
+  background: rgb(187, 201, 248);
+  color: #ffffff;
 }
 
 .shop-tile--regular .shop-pill--open {
@@ -1168,7 +1176,7 @@ textarea {
 }
 
 .shop-tile--premium .shop-pill--closed {
-  background: rgba(91, 125, 233, 0.35);
+  background: #5b7de9;
   color: #e4e9ff;
 }
 
@@ -1466,11 +1474,17 @@ textarea {
     margin: 32px auto 48px;
     padding: 36px 28px 40px;
     min-height: auto;
+    height: auto;
     gap: 28px;
   }
 
   .shop-grid {
+    position: relative;
+    left: auto;
+    top: auto;
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .shop-tile__surface {
@@ -1503,8 +1517,17 @@ textarea {
     width: min(520px, 80%);
   }
 
+  .shop-hero {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+  }
+
   .shop-hero__headline {
     width: min(820px, 92%);
+    margin: 0 auto 12px;
   }
 
   .auth-form .field span,
@@ -1607,5 +1630,13 @@ textarea {
   .shop-tile {
     width: 438px;
     height: 296px;
+  }
+
+  .shop-hero {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
   }
 }
