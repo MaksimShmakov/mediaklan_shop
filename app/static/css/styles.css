@@ -1330,11 +1330,12 @@ textarea {
   top: 282px;
   width: 290px;
   margin: 0;
-  font-family: "Druk Cyr", "Oswald", sans-serif;
+  font-family: "Oswald", sans-serif;
   text-transform: uppercase;
   font-size: 1.35rem;
   line-height: 1.1;
   letter-spacing: 0.5px;
+  font-weight: 600;
   color: #2b2b2b;
   text-align: center;
 }
