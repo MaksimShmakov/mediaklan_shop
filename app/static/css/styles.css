@@ -1262,8 +1262,8 @@ textarea {
 
 .store-card__qty {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 6px;
+  top: 4px;
   width: 72px;
   height: 39px;
   border-radius: 999px;
