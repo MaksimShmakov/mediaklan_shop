@@ -1276,9 +1276,9 @@ textarea {
   font-family: "Inter", sans-serif;
   color: #7b66c5;
   background: transparent;
-  letter-spacing: 0.2px;
   text-align: center;
-  line-height: 1;
+  line-height: 39px;
+  font-variant-numeric: tabular-nums;
   z-index: 2;
   pointer-events: none;
 }
