@@ -19,16 +19,18 @@
   <body class="{{ body_class }}">
     <div class="bg-orbs"></div>
     {% if "shop-view" in body_class %}
-    <header class="auth-topbar">
-      <div class="auth-brand">
-        <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
-        <span class="auth-brand__name">Медиаклан</span>
-        <span class="auth-brand__pill">SHOP</span>
-      </div>
-      {% if user %}
-      <div class="auth-topbar__points">Твои баллы: {{ user.points }}</div>
-      {% endif %}
-    </header>
+    <div class="shop-topbar-stage">
+      <header class="auth-topbar">
+        <div class="auth-brand">
+          <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
+          <span class="auth-brand__name">Медийный клан</span>
+          <span class="auth-brand__pill">SHOP</span>
+        </div>
+        {% if user %}
+        <div class="auth-topbar__points">Твои баллы: {{ user.points }}</div>
+        {% endif %}
+      </header>
+    </div>
     {% else %}
     <header class="topbar">
       <div class="container topbar__inner">
