@@ -37,14 +37,14 @@
     {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
     <article class="store-card">
       <div class="store-card__shell">
-        <div class="store-card__qty">{{ stock_value }} шт</div>
-      <div class="store-card__frame">
-        {% if product.image_url %}
-        <img src="{{ product.image_url }}" alt="{{ product.title }}" />
-        {% else %}
-        <div class="image-placeholder">Фото</div>
-        {% endif %}
-      </div>
+        <div class="store-card__frame">
+          {% if product.image_url %}
+          <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+          {% else %}
+          <div class="image-placeholder">Фото</div>
+          {% endif %}
+          <div class="store-card__qty">{{ stock_value }} шт</div>
+        </div>
       {% if variant %}
       <div class="store-card__price">{{ variant.points_cost }} баллов</div>
       {% endif %}
