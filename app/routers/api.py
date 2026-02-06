@@ -1,4 +1,5 @@
 import html
+from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import JSONResponse
@@ -17,6 +18,21 @@ from app.services.shops import get_shop_settings, has_access, is_shop_open
 router = APIRouter()
 
 
+class RedeemError(Exception):
+    def __init__(self, message: str, code: Optional[str] = None, status_code: int = 400) -> None:
+        super().__init__(message)
+        self.message = message
+        self.code = code
+        self.status_code = status_code
+
+
+def error_response(message: str, status_code: int = 400, code: Optional[str] = None) -> JSONResponse:
+    payload = {"ok": False, "message": message}
+    if code:
+        payload["code"] = code
+    return JSONResponse(payload, status_code=status_code)
+
+
 @router.post("/api/redeem")
 def redeem(
     request: Request,
@@ -26,38 +42,33 @@ def redeem(
 ) -> JSONResponse:
     user = get_current_user(request, db)
     if not user:
-        return JSONResponse(
-            {"ok": False, "message": "Нужна авторизация"},
-            status_code=401
+        return error_response(
+            "\u041d\u0443\u0436\u043d\u0430 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f",
+            status_code=401,
+            code="unauthorized",
         )
 
     variant = db.get(ProductVariant, payload.variant_id)
     if not variant or not variant.active or not variant.product or not (
         variant.product.active
     ):
-        return JSONResponse(
-            {"ok": False, "message": "Позиция недоступна"},
-            status_code=400
+        return error_response(
+            "\u041f\u043e\u0437\u0438\u0446\u0438\u044f \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430",
+            status_code=400,
         )
 
     shop_type = variant.product.shop_type
     if shop_type not in SHOP_TYPES:
-        return JSONResponse(
-            {"ok": False, "message": "Неверный магазин"},
-            status_code=400
-        )
+        return error_response("\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043c\u0430\u0433\u0430\u0437\u0438\u043d")
     if not has_access(db, user.tg_username, shop_type):
-        return JSONResponse(
-            {"ok": False, "message": "Нет доступа"},
-            status_code=403
+        return error_response(
+            "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430",
+            status_code=403,
         )
 
     settings = get_shop_settings(db, shop_type)
     if not is_shop_open(settings, local_now()):
-        return JSONResponse(
-            {"ok": False, "message": "Магазин закрыт"},
-            status_code=400
-        )
+        return error_response("\u041c\u0430\u0433\u0430\u0437\u0438\u043d \u0437\u0430\u043a\u0440\u044b\u0442")
 
     order_id = None
     product_title = None
@@ -69,10 +80,13 @@ def redeem(
         if not variant or not variant.active or not variant.product or not (
             variant.product.active
         ):
-            raise ValueError("Позиция недоступна")
+            raise RedeemError("\u041f\u043e\u0437\u0438\u0446\u0438\u044f \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430")
 
         if variant.stock is not None and variant.stock <= 0:
-            raise ValueError("Товар закончился")
+            raise RedeemError(
+                "\u0422\u043e\u0432\u0430\u0440 \u0437\u0430\u043a\u043e\u043d\u0447\u0438\u043b\u0441\u044f",
+                code="not-enough-tovar",
+            )
 
         product_title = variant.product.title if variant.product else "Товар"
         variant_label = variant.label
@@ -84,7 +98,10 @@ def redeem(
             .values(points=User.points - variant.points_cost)
         )
         if points_result.rowcount == 0:
-            raise ValueError("Недостаточно баллов")
+            raise RedeemError(
+                "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u0431\u0430\u043b\u043b\u043e\u0432",
+                code="not-enough-points",
+            )
 
         if variant.stock is not None:
             stock_result = db.execute(
@@ -96,7 +113,10 @@ def redeem(
                 .values(stock=ProductVariant.stock - 1)
             )
             if stock_result.rowcount == 0:
-                raise ValueError("Товар закончился")
+                raise RedeemError(
+                    "\u0422\u043e\u0432\u0430\u0440 \u0437\u0430\u043a\u043e\u043d\u0447\u0438\u043b\u0441\u044f",
+                    code="not-enough-tovar",
+                )
 
         order = Order(
             tg_username=user.tg_username,
@@ -106,11 +126,12 @@ def redeem(
         db.add(order)
         db.commit()
         order_id = order.id
-    except ValueError as exc:
+    except RedeemError as exc:
         db.rollback()
-        return JSONResponse(
-            {"ok": False, "message": str(exc)},
-            status_code=400
+        return error_response(
+            exc.message,
+            status_code=exc.status_code,
+            code=exc.code,
         )
     except Exception:
         db.rollback()
@@ -140,5 +161,6 @@ def redeem(
             "ok": True,
             "message": "Заказ оформлен. Мы свяжемся с вами в Telegram.",
             "points": new_points,
+            "code": "congrat",
         }
     )

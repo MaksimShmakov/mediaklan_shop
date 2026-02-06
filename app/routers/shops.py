@@ -13,6 +13,24 @@ from app.services.shops import get_shop_settings, has_access, is_shop_open
 
 router = APIRouter()
 
+RESULT_PAGES = {
+    "congrat": {
+        "image": "congrat.png",
+        "alt": "Поздравляем с покупкой!",
+        "action": "В магазин",
+    },
+    "not-enough-tovar": {
+        "image": "not-enough-tovar.png",
+        "alt": "Этот товар уже закончился",
+        "action": "Назад",
+    },
+    "not-enough-points": {
+        "image": "not-enough-points.png",
+        "alt": "Недостаточно баллов",
+        "action": "Назад",
+    },
+}
+
 
 @router.get("/shops", response_class=HTMLResponse)
 def shops(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
@@ -126,5 +144,34 @@ def product_detail(
             "open_now": open_now,
             "settings": settings,
             "product": product,
+        },
+    )
+
+
+@router.get("/shop/{shop_type}/result/{result_code}", response_class=HTMLResponse)
+def shop_result(
+    shop_type: str,
+    result_code: str,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
+    if shop_type not in SHOP_TYPES:
+        raise HTTPException(status_code=404)
+    if result_code not in RESULT_PAGES:
+        raise HTTPException(status_code=404)
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    payload = RESULT_PAGES[result_code]
+    return templates.TemplateResponse(
+        "shop_result.html",
+        {
+            "request": request,
+            "user": user,
+            "shop_type": shop_type,
+            "result_image": payload["image"],
+            "result_alt": payload["alt"],
+            "action_label": payload["action"],
         },
     )

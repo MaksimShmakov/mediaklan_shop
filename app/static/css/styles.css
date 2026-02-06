@@ -60,6 +60,59 @@ body {
   background: #8d73be url("/static/img/shop/vitrina-prem.png") center top / cover no-repeat;
 }
 
+.shop-result {
+  background: #8d73be url("/static/img/shop/back-dog.png") center top / cover no-repeat;
+}
+
+.shop-result .main {
+  padding: var(--auth-topbar-height) 0 0;
+}
+
+.shop-result .main__inner {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-result__wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0 80px;
+}
+
+.shop-result__card {
+  position: relative;
+  width: min(762px, 92vw);
+  aspect-ratio: 762 / 734;
+}
+
+.shop-result__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.shop-result__action {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 6.5%;
+  height: 12.5%;
+  border-radius: 999px;
+  background: transparent;
+  display: block;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.shop-result__action:focus-visible {
+  outline: 2px solid #7c63c4;
+  outline-offset: 4px;
+}
+
 .shop-view .shop-topbar-stage {
   position: fixed;
   left: 50%;

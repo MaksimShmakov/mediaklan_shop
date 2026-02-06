@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body_class %}shop-view shop-view--{{ shop_type }} shop-result{% endblock %}
+
+{% block content %}
+<section class="shop-result__wrap">
+  <div class="shop-result__card">
+    <img
+      class="shop-result__image"
+      src="/static/img/shop/{{ result_image }}"
+      alt="{{ result_alt }}"
+    />
+    <a
+      class="shop-result__action"
+      href="/shop/{{ shop_type }}"
+      aria-label="{{ action_label }}"
+      title="{{ action_label }}"
+    >
+      <span class="sr-only">{{ action_label }}</span>
+    </a>
+  </div>
+</section>
+{% endblock %}

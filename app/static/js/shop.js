@@ -36,6 +36,20 @@ const updatePoints = (points) => {
   }
 };
 
+const getShopType = () => {
+  const el = document.querySelector("[data-shop-type]");
+  return el ? el.dataset.shopType : null;
+};
+
+const redirectToResult = (code) => {
+  const shopType = getShopType();
+  if (!shopType || !code) return false;
+  const allowed = new Set(["congrat", "not-enough-tovar", "not-enough-points"]);
+  if (!allowed.has(code)) return false;
+  window.location.href = `/shop/${shopType}/result/${code}`;
+  return true;
+};
+
 const buttons = document.querySelectorAll(".redeem-btn");
 buttons.forEach((button) => {
   button.addEventListener("click", async () => {
@@ -54,6 +68,9 @@ buttons.forEach((button) => {
         body: JSON.stringify({ variant_id: Number(variantId) }),
       });
       const payload = await response.json();
+      if (payload.code && redirectToResult(payload.code)) {
+        return;
+      }
       if (!payload.ok) {
         showToast(payload.message || "Не удалось оформить заказ", true);
         return;
