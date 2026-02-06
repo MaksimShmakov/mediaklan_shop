@@ -15,8 +15,27 @@
     />
     <link rel="stylesheet" href="/static/css/styles.css" />
   </head>
-  <body class="{% block body_class %}{% endblock %}">
+  {% set body_class = (self.body_class() | trim) %}
+  <body class="{{ body_class }}">
     <div class="bg-orbs"></div>
+    {% if "shop-view" in body_class %}
+    <header class="auth-topbar shop-topbar">
+      <div class="auth-brand">
+        <img class="auth-brand__logo" src="/static/img/logo-acc-2.svg" alt="EL" />
+        <span class="auth-brand__name">Медиаклан</span>
+        <span class="auth-brand__pill">Маркет</span>
+      </div>
+      {% if user %}
+      <nav class="shop-topbar__nav">
+        <div class="pill">
+          <span class="pill__label">{{ user.tg_username }}</span>
+          <span class="pill__value">{{ user.points }} баллов</span>
+        </div>
+        <a class="ghost" href="/logout">Выход</a>
+      </nav>
+      {% endif %}
+    </header>
+    {% else %}
     <header class="topbar">
       <div class="container topbar__inner">
         <div class="brand">
@@ -41,6 +60,7 @@
         </nav>
       </div>
     </header>
+    {% endif %}
 
     <main class="main">
       <div class="container main__inner">
