@@ -49,6 +49,7 @@ body {
   --auth-stage-width: 1920px;
   --auth-stage-height: 1080px;
   --auth-scale: min(calc(100vw / 1920px), calc(100vh / 1080px));
+  zoom: 0.8;
 }
 
 .shop-view .shop-topbar-stage {
