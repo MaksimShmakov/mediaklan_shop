@@ -12,11 +12,15 @@
           <span class="auth-brand__name">Медийный клан</span>
           <span class="auth-brand__pill">SHOP</span>
         </div>
+        {% if user %}
+        <div class="auth-topbar__points">Твои баллы: {{ user.points }}</div>
+        {% endif %}
       </div>
 
       <div class="shop-panel">
         <div class="shop-hero">
-          <img class="shop-hero__headline" src="/static/img/common/thetext.png" alt="Добро пожаловать в магазин Медийного Клана!" />
+          <h1>ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН</h1>
+          <div class="shop-hero__script" aria-hidden="true">Медийного Клана!</div>
         </div>
 
         <div class="shop-grid">

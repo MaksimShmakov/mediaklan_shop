@@ -850,6 +850,20 @@ textarea {
   box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
 }
 
+.auth-topbar__points {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Inter", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
 .auth-brand {
   display: flex;
   align-items: center;
@@ -981,8 +995,8 @@ textarea {
 .shop-panel {
   position: absolute;
   left: 50%;
-  top: 192px;
-  transform: translateX(-50%);
+  top: calc(50% + 51px);
+  transform: translate(-50%, -50%);
   width: 1560px;
   height: 863px;
   background: #ffffff;
@@ -1008,29 +1022,28 @@ textarea {
 .shop-hero h1 {
   margin: 0;
   font-family: "Druk Cyr", "Oswald", sans-serif;
-  font-size: clamp(2.6rem, 4.8vw, 5.6rem);
+  font-size: 96px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  line-height: 0.95;
+  line-height: 0.9;
   color: #2a2a29;
 }
 
 .shop-hero__script {
-  display: none;
-}
-
-.shop-hero__script-img {
-  display: block;
-  width: min(840px, 80%);
-  height: auto;
-  margin: 6px auto 0;
-}
-
-.shop-hero__headline {
-  display: block;
-  width: 1084px;
-  height: auto;
-  margin: 0 auto 8px;
+  margin-top: -6px;
+  font-family: "Baystar Script PERSONAL USE ONLY", "Times New Roman", cursive;
+  font-size: 84px;
+  font-style: italic;
+  color: #9574c7;
+  line-height: 0.9;
+  user-select: none;
+  pointer-events: none;
+  text-shadow:
+    -3px -3px 0 #ffffff,
+    3px -3px 0 #ffffff,
+    -3px 3px 0 #ffffff,
+    3px 3px 0 #ffffff,
+    0 0 6px #ffffff;
 }
 
 .shop-grid {
@@ -1506,15 +1519,11 @@ textarea {
   }
 
   .shop-hero h1 {
-    font-size: 2.6rem;
+    font-size: 3rem;
   }
 
   .shop-hero__script {
-    font-size: 2rem;
-  }
-
-  .shop-hero__script-img {
-    width: min(520px, 80%);
+    font-size: 2.2rem;
   }
 
   .shop-hero {
@@ -1523,11 +1532,6 @@ textarea {
     top: auto;
     transform: none;
     width: 100%;
-  }
-
-  .shop-hero__headline {
-    width: min(820px, 92%);
-    margin: 0 auto 12px;
   }
 
   .auth-form .field span,
@@ -1603,19 +1607,11 @@ textarea {
   }
 
   .shop-hero h1 {
-    font-size: 2.1rem;
+    font-size: 2.4rem;
   }
 
   .shop-hero__script {
-    font-size: 1.7rem;
-  }
-
-  .shop-hero__script-img {
-    width: min(420px, 82%);
-  }
-
-  .shop-hero__headline {
-    width: min(640px, 94%);
+    font-size: 1.8rem;
   }
 
   .shop-tile__surface {
