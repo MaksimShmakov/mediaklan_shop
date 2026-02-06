@@ -1171,35 +1171,37 @@ textarea {
 
 .store-card__frame {
   position: absolute;
-  left: 22px;
-  top: 20px;
-  width: 301px;
-  height: 201px;
-  border-radius: 18px;
+  left: 15px;
+  top: 15px;
+  width: 308px;
+  height: 225px;
+  border-radius: 20px;
   display: grid;
   place-items: center;
   overflow: hidden;
+  z-index: 1;
 }
 
 .store-card__frame img {
-  width: 90%;
-  height: 90%;
+  width: 95%;
+  height: 95%;
   object-fit: contain;
 }
 
 .store-card__qty {
   position: absolute;
-  left: 230px;
-  top: 10px;
-  width: 91px;
-  height: 44px;
+  right: 15px;
+  top: 15px;
+  width: 72px;
+  height: 39px;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #7b66c5;
-  background: #ede5fc;
+  background: transparent;
+  z-index: 2;
 }
 
 .store-card__price {
@@ -1215,6 +1217,7 @@ textarea {
   font-weight: 600;
   color: #ffffff;
   background: #9574c7;
+  z-index: 2;
 }
 
 .store-card__shell h3 {
@@ -1225,8 +1228,9 @@ textarea {
   margin: 0;
   font-family: "Druk Cyr", "Oswald", sans-serif;
   text-transform: uppercase;
-  font-size: 0.95rem;
-  letter-spacing: 0.6px;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
   color: #2b2b2b;
   text-align: center;
 }
