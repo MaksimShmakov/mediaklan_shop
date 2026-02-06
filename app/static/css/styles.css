@@ -901,6 +901,14 @@ textarea {
   justify-content: space-between;
 }
 
+.pagination {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .variants {
   margin-top: 16px;
   display: flex;

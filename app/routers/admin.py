@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import (ADMIN_PASSWORD, ORDER_STATUS_LABELS,
@@ -53,9 +53,12 @@ def admin_dashboard(
     status: Optional[str] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
+    users_page: int = 1,
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     require_admin(request)
+    users_page = max(1, users_page)
+    users_per_page = 50
     allowlist_by_shop = {shop_type: [] for shop_type in SHOP_TYPES}
     for entry in db.execute(
         select(AllowlistEntry).order_by(AllowlistEntry.created_at)
@@ -74,8 +77,15 @@ def admin_dashboard(
     for product in products:
         products_by_shop[product.shop_type].append(product)
 
+    total_users = db.execute(select(func.count(User.id))).scalar_one()
+    total_pages = max(1, (total_users + users_per_page - 1) // users_per_page)
+    if users_page > total_pages:
+        users_page = total_pages
     users = db.execute(
-        select(User).order_by(User.points.desc())
+        select(User)
+        .order_by(User.points.desc())
+        .offset((users_page - 1) * users_per_page)
+        .limit(users_per_page)
     ).scalars().all()
     filters, resolved_status, _, _ = build_order_filters(
         status, date_from, date_to
@@ -112,6 +122,10 @@ def admin_dashboard(
             "settings_by_shop": settings_by_shop,
             "products_by_shop": products_by_shop,
             "users": users,
+            "users_page": users_page,
+            "users_pages_total": total_pages,
+            "users_has_prev": users_page > 1,
+            "users_has_next": users_page < total_pages,
             "orders": orders,
             "order_statuses": ORDER_STATUSES,
             "order_status_labels": ORDER_STATUS_LABELS,

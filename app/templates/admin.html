@@ -94,6 +94,17 @@
     </div>
     {% endfor %}
   </div>
+  {% if users_pages_total > 1 %}
+  <div class="pagination">
+    {% if users_has_prev %}
+    <a class="ghost" href="/admin?users_page={{ users_page - 1 }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Назад</a>
+    {% endif %}
+    <span class="muted">Стр. {{ users_page }} / {{ users_pages_total }}</span>
+    {% if users_has_next %}
+    <a class="ghost" href="/admin?users_page={{ users_page + 1 }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Вперёд</a>
+    {% endif %}
+  </div>
+  {% endif %}
 </section>
 
 <section class="card panel">
