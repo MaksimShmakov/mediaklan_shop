@@ -1307,8 +1307,8 @@ textarea {
 
 .store-grid {
   display: grid;
-  grid-template-columns: repeat(3, 338px);
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(338px, 338px));
+  gap: 28px;
   margin-top: 0;
   justify-items: start;
   justify-content: start;
