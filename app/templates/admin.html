@@ -57,6 +57,14 @@
         </label>
         <button class="btn btn--ghost" type="submit">Добавить</button>
       </form>
+      <form class="form form--inline" method="post" action="/admin/allowlist/add-all">
+        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+        <button class="ghost" type="submit">Добавить всех</button>
+      </form>
+      <form class="form form--inline" method="post" action="/admin/allowlist/remove-all" onsubmit="return confirm('Убрать доступ у всех пользователей для этого магазина?');">
+        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+        <button class="ghost" type="submit">Убрать всех</button>
+      </form>
       <div class="list">
         {% for entry in allowlist_by_shop[shop_type] %}
         <div class="list__row">

@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import (ADMIN_PASSWORD, ORDER_STATUS_LABELS,
@@ -230,6 +230,50 @@ def admin_allowlist_remove(
     if entry:
         db.delete(entry)
         db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+
+@router.post("/admin/allowlist/add-all")
+def admin_allowlist_add_all(
+    request: Request,
+    shop_type: str = Form(...),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    if shop_type not in SHOP_TYPES:
+        raise HTTPException(status_code=400)
+    existing_usernames = set(
+        db.execute(
+            select(AllowlistEntry.tg_username).where(
+                AllowlistEntry.shop_type == shop_type
+            )
+        ).scalars().all()
+    )
+    usernames = db.execute(select(User.tg_username)).scalars().all()
+    entries = [
+        AllowlistEntry(tg_username=username, shop_type=shop_type)
+        for username in usernames
+        if username not in existing_usernames
+    ]
+    if entries:
+        db.add_all(entries)
+        db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+
+@router.post("/admin/allowlist/remove-all")
+def admin_allowlist_remove_all(
+    request: Request,
+    shop_type: str = Form(...),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    if shop_type not in SHOP_TYPES:
+        raise HTTPException(status_code=400)
+    db.execute(
+        delete(AllowlistEntry).where(AllowlistEntry.shop_type == shop_type)
+    )
+    db.commit()
     return RedirectResponse("/admin", status_code=303)
 
 
