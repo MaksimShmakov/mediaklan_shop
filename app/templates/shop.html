@@ -3,7 +3,9 @@
 {% block body_class %}shop-view shop-view--{{ shop_type }}{% endblock %}
 
 {% block content %}
-<section class="store-panel" data-shop-type="{{ shop_type }}">
+{% set is_message_state = (not allowed) or (not open_now) %}
+<section class="store-panel{% if is_message_state %} store-panel--message{% endif %}" data-shop-type="{{ shop_type }}">
+  {% if not is_message_state %}
   <div class="store-hero">
     <div class="store-hero__title">
       <div class="store-hero__headline">
@@ -11,6 +13,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
   {% if not allowed %}
   <section class="store-message">

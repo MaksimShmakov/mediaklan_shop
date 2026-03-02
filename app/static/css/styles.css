@@ -1292,6 +1292,11 @@ textarea {
     0 2px 0 rgba(255, 255, 255, 0.7) inset;
 }
 
+.store-panel--message {
+  width: min(1200px, 100%);
+  padding: 36px 42px 40px;
+}
+
 .shop-view .store-panel {
   zoom: 0.8;
 }
@@ -1303,6 +1308,20 @@ textarea {
   padding: 24px;
   color: #f2edf9;
   width: 100%;
+}
+
+.store-message h2 {
+  margin: 0 0 14px;
+  font-family: "Inter", sans-serif;
+  font-size: clamp(1.9rem, 2.7vw, 2.65rem);
+  line-height: 1.15;
+}
+
+.store-message p {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.45vw, 1.6rem);
+  line-height: 1.35;
+  color: rgba(242, 237, 249, 0.92);
 }
 
 .store-grid {
@@ -2192,6 +2211,24 @@ textarea {
     padding: 26px 24px 32px;
   }
 
+  .store-panel--message {
+    width: min(100%, 920px);
+    padding: 24px 20px 26px;
+  }
+
+  .store-panel--message .store-message {
+    padding: 20px 18px;
+    border-radius: 18px;
+  }
+
+  .store-panel--message .store-message h2 {
+    font-size: clamp(1.45rem, 3.4vw, 2rem);
+  }
+
+  .store-panel--message .store-message p {
+    font-size: clamp(0.95rem, 2.3vw, 1.15rem);
+  }
+
   .shop-result__wrap {
     padding: 20px 0 36px;
   }
@@ -2402,6 +2439,27 @@ textarea {
     width: min(100%, 520px);
     border-radius: 28px;
     padding: 18px 14px 22px;
+  }
+
+  .store-panel--message {
+    width: min(100%, 520px);
+    border-radius: 24px;
+    padding: 14px 10px 16px;
+  }
+
+  .store-panel--message .store-message {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
+  .store-panel--message .store-message h2 {
+    font-size: clamp(1.25rem, 5.4vw, 1.5rem);
+    margin-bottom: 10px;
+  }
+
+  .store-panel--message .store-message p {
+    font-size: clamp(0.95rem, 3.9vw, 1.05rem);
+    line-height: 1.4;
   }
 
   .store-hero__headline {
