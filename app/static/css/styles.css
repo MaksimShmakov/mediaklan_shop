@@ -2038,28 +2038,44 @@ textarea {
   .auth-topbar {
     position: relative;
     width: 100%;
-    height: 72px;
-    padding: 0 24px;
+    height: auto;
+    min-height: 0;
+    padding: 8px 24px 10px;
     border-radius: 0 0 24px 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "brand"
+      "points";
+    row-gap: 4px;
+    align-content: center;
+  }
+
+  .auth-brand {
+    grid-area: brand;
   }
 
   .auth-topbar__points {
+    grid-area: points;
+    position: static;
     left: auto;
-    right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    max-width: 55%;
-    text-align: right;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    text-align: left;
     font-size: 0.88rem;
     letter-spacing: 0.4px;
     text-transform: none;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .shop-view {
     --auth-scale: 1;
-    --auth-topbar-height: 72px;
+    --auth-topbar-height: 88px;
   }
 
   .shop-view .container {
@@ -2229,7 +2245,7 @@ textarea {
   }
 
   .shop-view {
-    --auth-topbar-height: 64px;
+    --auth-topbar-height: 84px;
   }
 
   .shop-view .container {
@@ -2237,8 +2253,9 @@ textarea {
   }
 
   .shop-view .shop-topbar-stage .auth-topbar {
-    height: 64px;
-    padding: 0 14px;
+    height: auto;
+    min-height: 0;
+    padding: 8px 14px 10px;
     border-radius: 0 0 18px 18px;
   }
 
@@ -2319,9 +2336,15 @@ textarea {
   }
 
   .auth-topbar__points {
-    right: 14px;
-    font-size: 0.75rem;
-    max-width: 52%;
+    position: static;
+    left: auto;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    text-align: left;
+    font-size: 0.82rem;
   }
 
   .auth-panel__header h1 {
