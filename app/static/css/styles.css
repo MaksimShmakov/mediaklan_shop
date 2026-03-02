@@ -2271,8 +2271,9 @@ textarea {
   }
 
   .auth--shops .shop-tile__time {
-    left: 48.8%;
-    top: 43.8%;
+    left: auto;
+    right: 9.2%;
+    top: 43.9%;
   }
 
   .auth--shops .shop-tile__status {
@@ -2288,9 +2289,19 @@ textarea {
   }
 
   .auth--shops .shop-tile__time-pill {
-    width: 136px;
-    height: 30px;
-    font-size: 0.86rem;
+    width: clamp(132px, 36vw, 146px);
+    height: clamp(30px, 7.4vw, 34px);
+    font-size: clamp(0.84rem, 2.4vw, 0.95rem);
+    padding: 0 10px;
+  }
+
+  .auth--shops .shop-tile__time-pill::before {
+    inset: 1px;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .auth--shops .shop-tile--premium .shop-tile__time-pill::before {
+    border-color: rgba(91, 125, 233, 0.18);
   }
 
   .auth-brand__logo {
@@ -2383,5 +2394,18 @@ textarea {
     left: 12px;
     right: 12px;
     bottom: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth--shops .shop-tile__time {
+    right: 8.4%;
+    top: 44.3%;
+  }
+
+  .auth--shops .shop-tile__time-pill {
+    width: 132px;
+    height: 30px;
+    font-size: 0.84rem;
   }
 }
