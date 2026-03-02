@@ -1455,8 +1455,9 @@ textarea {
   padding: 0;
   position: relative;
   overflow: hidden;
-  width: 705px;
-  height: 477px;
+  width: min(705px, 100%);
+  height: auto;
+  aspect-ratio: 705 / 477;
 }
 
 .shop-tile__surface {
@@ -1466,8 +1467,8 @@ textarea {
   display: block;
   box-sizing: border-box;
   position: relative;
-  width: 705px;
-  height: 477px;
+  width: 100%;
+  height: 100%;
 }
 
 .shop-tile--regular {
@@ -1508,8 +1509,8 @@ textarea {
 
 .shop-tile__time {
   position: absolute;
-  left: 342px;
-  top: 206px;
+  left: 48.511%;
+  top: 43.187%;
   display: flex;
   align-items: center;
 }
@@ -1519,8 +1520,8 @@ textarea {
 }
 
 .shop-tile__time-pill {
-  width: 161px;
-  height: 35px;
+  width: clamp(118px, 22vw, 161px);
+  height: clamp(28px, 4.8vw, 35px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1528,7 +1529,7 @@ textarea {
   border-radius: 999px;
   background: #5b7de9;
   font-weight: 600;
-  font-size: 20px;
+  font-size: clamp(0.9rem, 1.8vw, 1.25rem);
   color: #e4e9ff;
   line-height: 1;
 }
@@ -1540,21 +1541,21 @@ textarea {
 
 .shop-tile__status {
   position: absolute;
-  left: 51px;
-  top: 383px;
+  left: 7.234%;
+  top: 80.294%;
 }
 
 .shop-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 187px;
-  height: 44px;
+  width: clamp(136px, 26vw, 187px);
+  height: clamp(34px, 5.4vw, 44px);
   padding: 0 12px;
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 20px;
+  font-size: clamp(0.95rem, 1.9vw, 1.25rem);
   text-decoration: none;
   line-height: 1;
 }
@@ -1825,6 +1826,132 @@ textarea {
   }
 }
 
+@media (max-width: 1200px) {
+  .auth--shops .auth-topbar {
+    position: relative;
+    height: auto;
+    min-height: 72px;
+    padding: 10px 18px;
+    border-radius: 0 0 20px 20px;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .auth--shops .auth-brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .auth--shops .auth-brand__logo {
+    width: 52px;
+    height: 28px;
+  }
+
+  .auth--shops .auth-brand__name {
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .auth--shops .auth-brand__pill {
+    font-size: clamp(0.75rem, 1.6vw, 0.95rem);
+    padding: 2px 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .auth--shops .auth-topbar__points {
+    position: static;
+    left: auto;
+    right: auto;
+    top: auto;
+    transform: none;
+    margin-left: 0;
+    flex-basis: 100%;
+    max-width: 100%;
+    font-size: clamp(0.75rem, 1.7vw, 0.95rem);
+    letter-spacing: 0.3px;
+    text-transform: none;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .auth--shops .shop-panel {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: min(calc(100% - 24px), 920px);
+    margin: 20px auto 28px;
+    padding: 24px 18px 24px;
+    min-height: auto;
+    height: auto;
+    border-radius: 28px;
+    gap: 18px;
+  }
+
+  .auth--shops .shop-hero {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .auth--shops .shop-hero__headline {
+    width: min(100%, 820px);
+    height: auto;
+    aspect-ratio: 1084 / 219;
+  }
+
+  .auth--shops .shop-grid {
+    position: relative;
+    left: auto;
+    top: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    justify-items: center;
+  }
+
+  .auth--shops .shop-tile {
+    width: min(705px, 100%);
+    height: auto;
+  }
+
+  .auth--shops .shop-tile__surface {
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+
+  .shop-view {
+    --auth-scale: 1;
+    --auth-topbar-height: 72px;
+  }
+
+  .shop-view .container {
+    padding: 0 20px;
+  }
+
+  .shop-view .shop-topbar-stage {
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+
+  .shop-view .main {
+    align-items: flex-start;
+  }
+
+  .shop-view .store-panel {
+    zoom: 1;
+    margin: 18px auto 32px;
+  }
+}
+
 @media (max-width: 900px) {
   .product-detail {
     grid-template-columns: 1fr;
@@ -1952,13 +2079,12 @@ textarea {
   }
 
   .shop-tile__surface {
-    transform: scale(0.75);
-    transform-origin: top left;
+    transform: none;
   }
 
   .shop-tile {
-    width: 530px;
-    height: 358px;
+    width: min(530px, 100%);
+    height: auto;
   }
 
   .auth-panel__header h1 {
@@ -2112,8 +2238,7 @@ textarea {
   }
 
   .shop-tile__surface {
-    transform: scale(0.62);
-    transform-origin: top left;
+    transform: none;
   }
 
   .shop-tile__time {
@@ -2121,8 +2246,8 @@ textarea {
   }
 
   .shop-tile {
-    width: 438px;
-    height: 296px;
+    width: min(438px, 100%);
+    height: auto;
   }
 
   .shop-hero {
