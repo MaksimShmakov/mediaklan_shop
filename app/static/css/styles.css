@@ -1455,9 +1455,8 @@ textarea {
   padding: 0;
   position: relative;
   overflow: hidden;
-  width: min(705px, 100%);
-  height: auto;
-  aspect-ratio: 705 / 477;
+  width: 705px;
+  height: 477px;
 }
 
 .shop-tile__surface {
@@ -1467,8 +1466,8 @@ textarea {
   display: block;
   box-sizing: border-box;
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 705px;
+  height: 477px;
 }
 
 .shop-tile--regular {
@@ -1509,8 +1508,8 @@ textarea {
 
 .shop-tile__time {
   position: absolute;
-  left: 48.511%;
-  top: 43.187%;
+  left: 342px;
+  top: 206px;
   display: flex;
   align-items: center;
 }
@@ -1520,8 +1519,8 @@ textarea {
 }
 
 .shop-tile__time-pill {
-  width: clamp(118px, 22vw, 161px);
-  height: clamp(28px, 4.8vw, 35px);
+  width: 161px;
+  height: 35px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1529,9 +1528,20 @@ textarea {
   border-radius: 999px;
   background: #5b7de9;
   font-weight: 600;
-  font-size: clamp(0.9rem, 1.8vw, 1.25rem);
+  font-size: 20px;
   color: #e4e9ff;
   line-height: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.shop-tile__time-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0.7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  pointer-events: none;
 }
 
 .shop-tile--premium .shop-tile__time-pill {
@@ -1539,23 +1549,27 @@ textarea {
   color: #5b7de9;
 }
 
+.shop-tile--premium .shop-tile__time-pill::before {
+  border-color: rgba(91, 125, 233, 0.24);
+}
+
 .shop-tile__status {
   position: absolute;
-  left: 7.234%;
-  top: 80.294%;
+  left: 51px;
+  top: 383px;
 }
 
 .shop-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(136px, 26vw, 187px);
-  height: clamp(34px, 5.4vw, 44px);
+  width: 187px;
+  height: 44px;
   padding: 0 12px;
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: clamp(0.95rem, 1.9vw, 1.25rem);
+  font-size: 20px;
   text-decoration: none;
   line-height: 1;
 }
