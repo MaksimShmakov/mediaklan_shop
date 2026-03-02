@@ -1942,6 +1942,7 @@ textarea {
   .auth--shops .shop-tile {
     width: min(705px, 100%);
     height: auto;
+    aspect-ratio: 705 / 477;
   }
 
   .auth--shops .shop-tile__surface {
@@ -2265,6 +2266,8 @@ textarea {
 
   .auth--shops .shop-tile {
     width: min(438px, 100%);
+    height: auto;
+    aspect-ratio: 705 / 477;
   }
 
   .auth--shops .shop-tile__time {
