@@ -85,7 +85,7 @@ body {
 
 .shop-result__card {
   position: relative;
-  width: min(calc(762px * var(--result-scale)), calc(92vw * var(--result-scale)));
+  width: min(calc(762px * var(--result-scale)), 92vw);
   aspect-ratio: 762 / 734;
 }
 
@@ -1307,34 +1307,35 @@ textarea {
 
 .store-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(338px, 338px));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 338px));
   gap: 28px;
   margin-top: 0;
-  justify-items: start;
+  justify-items: center;
   justify-content: start;
 }
 
 .store-card {
-  width: 338px;
-  height: 459px;
+  width: min(338px, 100%);
+  height: auto;
+  aspect-ratio: 338 / 459;
   display: grid;
   place-items: center;
 }
 
 .store-card__shell {
   background: url("/static/img/shop/the-card.png") center/contain no-repeat;
-  width: 338px;
-  height: 459px;
+  width: 100%;
+  height: 100%;
   padding: 0;
   position: relative;
 }
 
 .store-card__frame {
   position: absolute;
-  left: 15px;
-  top: 15px;
-  width: 308px;
-  height: 225px;
+  left: 4.438%;
+  top: 3.268%;
+  width: 91.124%;
+  height: 49.02%;
   border-radius: 20px;
   display: grid;
   place-items: center;
@@ -1350,15 +1351,15 @@ textarea {
 
 .store-card__qty {
   position: absolute;
-  right: 6px;
-  top: 4px;
-  width: 72px;
-  height: 39px;
+  right: 1.775%;
+  top: 0.871%;
+  width: 21.302%;
+  height: 8.497%;
   border-radius: 999px;
   display: grid;
   place-items: center;
   padding: 1px 0 0;
-  font-size: 0.7rem;
+  font-size: clamp(0.62rem, 0.56rem + 0.15vw, 0.7rem);
   font-weight: 700;
   font-family: "Inter", sans-serif;
   color: #7b66c5;
@@ -1372,14 +1373,14 @@ textarea {
 
 .store-card__price {
   position: absolute;
-  left: 89px;
-  top: 230px;
-  width: 162px;
-  height: 41px;
+  left: 26.331%;
+  top: 50.109%;
+  width: 47.929%;
+  height: 8.932%;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  font-size: 0.85rem;
+  font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.85rem);
   font-weight: 600;
   color: #ffffff;
   background: #9574c7;
@@ -1388,13 +1389,13 @@ textarea {
 
 .store-card__shell h3 {
   position: absolute;
-  left: 24px;
-  top: 282px;
-  width: 290px;
+  left: 7.101%;
+  top: 61.438%;
+  width: 85.799%;
   margin: 0;
   font-family: "Oswald", sans-serif;
   text-transform: uppercase;
-  font-size: 1.35rem;
+  font-size: clamp(1.1rem, 1rem + 0.35vw, 1.35rem);
   line-height: 1.1;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -1404,9 +1405,9 @@ textarea {
 
 .store-card__desc {
   position: absolute;
-  left: 24px;
-  top: 314px;
-  width: 290px;
+  left: 7.101%;
+  top: 68.409%;
+  width: 85.799%;
   margin: 0;
   color: rgba(43, 43, 43, 0.65);
   font-size: 0.78rem;
@@ -1417,10 +1418,10 @@ textarea {
 
 .store-card__buy {
   position: absolute;
-  left: 40px;
-  top: 384px;
-  width: 261px;
-  height: 57px;
+  left: 11.834%;
+  top: 83.66%;
+  width: 77.219%;
+  height: 12.419%;
   border: none;
   border-radius: 999px;
   background: transparent;
@@ -1864,6 +1865,61 @@ textarea {
     border-radius: 0 0 24px 24px;
   }
 
+  .auth-topbar__points {
+    left: auto;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 55%;
+    text-align: right;
+    font-size: 0.88rem;
+    letter-spacing: 0.4px;
+    text-transform: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .shop-view {
+    --auth-scale: 1;
+    --auth-topbar-height: 72px;
+  }
+
+  .shop-view .container {
+    padding: 0 20px;
+  }
+
+  .shop-view .shop-topbar-stage {
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+
+  .shop-view .main {
+    align-items: flex-start;
+  }
+
+  .shop-view .store-panel {
+    zoom: 1;
+    margin: 18px auto 32px;
+  }
+
+  .store-hero__headline {
+    margin-bottom: 30px;
+  }
+
+  .shop-view--regular .store-hero__headline {
+    width: min(659px, 100%);
+    height: auto;
+    aspect-ratio: 659 / 186;
+  }
+
+  .shop-view--premium .store-hero__headline {
+    width: min(867px, 100%);
+    height: auto;
+    aspect-ratio: 867 / 186;
+  }
+
   .auth-panel {
     position: relative;
     width: min(calc(100% - 32px), 520px);
@@ -1929,6 +1985,8 @@ textarea {
 
   .store-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    justify-items: center;
   }
 
   .store-hero {
@@ -1939,6 +1997,10 @@ textarea {
   .store-panel {
     width: min(100%, 980px);
     padding: 26px 24px 32px;
+  }
+
+  .shop-result__wrap {
+    padding: 20px 0 36px;
   }
 
   .auth-form .field span,
@@ -1989,13 +2051,43 @@ textarea {
     min-height: auto;
   }
 
+  .shop-view {
+    --auth-topbar-height: 64px;
+  }
+
+  .shop-view .container {
+    padding: 0 12px;
+  }
+
+  .shop-view .shop-topbar-stage .auth-topbar {
+    height: 64px;
+    padding: 0 14px;
+    border-radius: 0 0 18px 18px;
+  }
+
   .auth-brand__logo {
     width: 52px;
     height: 28px;
   }
 
+  .auth-brand {
+    gap: 8px;
+  }
+
   .auth-brand__name {
     font-size: 1.2rem;
+  }
+
+  .auth-brand__pill {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .auth-topbar__points {
+    right: 14px;
+    font-size: 0.75rem;
+    max-width: 52%;
   }
 
   .auth-panel__header h1 {
@@ -2052,6 +2144,17 @@ textarea {
 
   .store-panel {
     width: min(100%, 520px);
-    padding: 22px 20px 28px;
+    border-radius: 28px;
+    padding: 18px 14px 22px;
+  }
+
+  .store-hero__headline {
+    margin-bottom: 24px;
+  }
+
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
   }
 }
