@@ -615,6 +615,18 @@ body {
   border-color: rgba(167, 139, 250, 0.55);
 }
 
+.ghost--danger {
+  color: #ff8ea6;
+  background: rgba(255, 77, 166, 0.14);
+  border-color: rgba(255, 77, 166, 0.4);
+}
+
+.ghost--danger:hover {
+  color: #ffd5e2;
+  background: rgba(255, 77, 166, 0.24);
+  border-color: rgba(255, 77, 166, 0.58);
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

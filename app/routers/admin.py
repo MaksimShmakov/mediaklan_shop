@@ -439,6 +439,17 @@ def admin_order_status(
     return RedirectResponse("/admin", status_code=303)
 
 
+@router.post("/admin/orders/clear")
+def admin_orders_clear(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    db.execute(delete(Order))
+    db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+
 @router.post("/admin/variant/add")
 def admin_variant_add(
     request: Request,

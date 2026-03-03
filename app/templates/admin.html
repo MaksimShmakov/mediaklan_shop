@@ -142,6 +142,16 @@
       <a class="ghost" href="/admin">Сбросить</a>
     </form>
     <a class="btn btn--ghost" href="{{ export_url }}">Скачать CSV</a>
+    <form
+      class="form form--inline"
+      method="post"
+      action="/admin/orders/clear"
+      onsubmit="return confirm('Удалить все заказы без возможности восстановления?');"
+    >
+      <button class="ghost ghost--danger" type="submit">
+        Очистить все заказы
+      </button>
+    </form>
   </div>
   <div class="list">
     {% if orders %}
