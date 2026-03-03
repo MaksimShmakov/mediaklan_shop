@@ -2,6 +2,7 @@ import csv
 import io
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlencode
 
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
@@ -54,42 +55,113 @@ def admin_dashboard(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     users_page: int = 1,
+    orders_page: int = 1,
+    allowlist_page_regular: int = 1,
+    allowlist_page_premium: int = 1,
+    products_page_regular: int = 1,
+    products_page_premium: int = 1,
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     require_admin(request)
-    users_page = max(1, users_page)
+
     users_per_page = 50
-    allowlist_by_shop = {shop_type: [] for shop_type in SHOP_TYPES}
-    for entry in db.execute(
-        select(AllowlistEntry).order_by(AllowlistEntry.created_at)
-    ).scalars():
-        if entry.shop_type in allowlist_by_shop:
-            allowlist_by_shop[entry.shop_type].append(entry)
+    orders_per_page = 30
+    allowlist_per_page = 30
+    products_per_page = 8
+
+    users_page = max(1, users_page)
+    orders_page = max(1, orders_page)
+    allowlist_page_by_shop = {
+        "regular": max(1, allowlist_page_regular),
+        "premium": max(1, allowlist_page_premium),
+    }
+    products_page_by_shop = {
+        "regular": max(1, products_page_regular),
+        "premium": max(1, products_page_premium),
+    }
+
+    allowlist_by_shop = {}
+    allowlist_pagination = {}
+    for shop_type in SHOP_TYPES:
+        total_entries = db.execute(
+            select(func.count(AllowlistEntry.id)).where(
+                AllowlistEntry.shop_type == shop_type
+            )
+        ).scalar_one()
+        pages_total = max(
+            1, (total_entries + allowlist_per_page - 1) // allowlist_per_page
+        )
+        page = min(allowlist_page_by_shop.get(shop_type, 1), pages_total)
+        entries = db.execute(
+            select(AllowlistEntry)
+            .where(AllowlistEntry.shop_type == shop_type)
+            .order_by(AllowlistEntry.created_at)
+            .offset((page - 1) * allowlist_per_page)
+            .limit(allowlist_per_page)
+        ).scalars().all()
+        allowlist_by_shop[shop_type] = entries
+        allowlist_pagination[shop_type] = {
+            "page": page,
+            "pages_total": pages_total,
+            "has_prev": page > 1,
+            "has_next": page < pages_total,
+        }
 
     settings_by_shop = {
         shop_type: get_shop_settings(db, shop_type) for shop_type in SHOP_TYPES
     }
 
-    products_by_shop = {shop_type: [] for shop_type in SHOP_TYPES}
-    products = db.execute(
-        select(Product).order_by(Product.shop_type, Product.position)
-    ).scalars().all()
-    for product in products:
-        products_by_shop[product.shop_type].append(product)
+    products_by_shop = {}
+    products_pagination = {}
+    for shop_type in SHOP_TYPES:
+        total_products = db.execute(
+            select(func.count(Product.id)).where(Product.shop_type == shop_type)
+        ).scalar_one()
+        pages_total = max(
+            1, (total_products + products_per_page - 1) // products_per_page
+        )
+        page = min(products_page_by_shop.get(shop_type, 1), pages_total)
+        products_by_shop[shop_type] = db.execute(
+            select(Product)
+            .where(Product.shop_type == shop_type)
+            .order_by(Product.position, Product.created_at)
+            .offset((page - 1) * products_per_page)
+            .limit(products_per_page)
+        ).scalars().all()
+        products_pagination[shop_type] = {
+            "page": page,
+            "pages_total": pages_total,
+            "has_prev": page > 1,
+            "has_next": page < pages_total,
+        }
 
     total_users = db.execute(select(func.count(User.id))).scalar_one()
-    total_pages = max(1, (total_users + users_per_page - 1) // users_per_page)
-    if users_page > total_pages:
-        users_page = total_pages
+    users_pages_total = max(
+        1, (total_users + users_per_page - 1) // users_per_page
+    )
+    if users_page > users_pages_total:
+        users_page = users_pages_total
     users = db.execute(
         select(User)
         .order_by(User.points.desc())
         .offset((users_page - 1) * users_per_page)
         .limit(users_per_page)
     ).scalars().all()
+
     filters, resolved_status, _, _ = build_order_filters(
         status, date_from, date_to
     )
+
+    orders_count_query = select(func.count(Order.id))
+    if filters:
+        orders_count_query = orders_count_query.where(*filters)
+    total_orders = db.execute(orders_count_query).scalar_one()
+    orders_pages_total = max(
+        1, (total_orders + orders_per_page - 1) // orders_per_page
+    )
+    if orders_page > orders_pages_total:
+        orders_page = orders_pages_total
+
     orders_query = (
         select(Order, ProductVariant, Product)
         .join(
@@ -98,7 +170,8 @@ def admin_dashboard(
         )
         .join(Product, ProductVariant.product_id == Product.id, isouter=True)
         .order_by(Order.created_at.desc())
-        .limit(60)
+        .offset((orders_page - 1) * orders_per_page)
+        .limit(orders_per_page)
     )
     if filters:
         orders_query = orders_query.where(*filters)
@@ -114,19 +187,91 @@ def admin_dashboard(
             }
         )
 
+    def build_admin_url(**overrides: object) -> str:
+        params: dict[str, object] = {
+            "status": resolved_status or "",
+            "date_from": date_from or "",
+            "date_to": date_to or "",
+            "users_page": users_page,
+            "orders_page": orders_page,
+        }
+        for shop_type in SHOP_TYPES:
+            params[f"allowlist_page_{shop_type}"] = allowlist_pagination[
+                shop_type
+            ]["page"]
+            params[f"products_page_{shop_type}"] = products_pagination[
+                shop_type
+            ]["page"]
+        params.update(overrides)
+
+        query_params: dict[str, str] = {}
+        for key, value in params.items():
+            if value is None:
+                continue
+            if isinstance(value, int):
+                if value > 1:
+                    query_params[key] = str(value)
+                continue
+            text = str(value).strip()
+            if text:
+                query_params[key] = text
+
+        query = urlencode(query_params)
+        return f"/admin?{query}" if query else "/admin"
+
+    for shop_type in SHOP_TYPES:
+        allowlist_page_key = f"allowlist_page_{shop_type}"
+        allowlist_pagination[shop_type]["prev_url"] = build_admin_url(
+            **{allowlist_page_key: allowlist_pagination[shop_type]["page"] - 1}
+        )
+        allowlist_pagination[shop_type]["next_url"] = build_admin_url(
+            **{allowlist_page_key: allowlist_pagination[shop_type]["page"] + 1}
+        )
+
+        products_page_key = f"products_page_{shop_type}"
+        products_pagination[shop_type]["prev_url"] = build_admin_url(
+            **{products_page_key: products_pagination[shop_type]["page"] - 1}
+        )
+        products_pagination[shop_type]["next_url"] = build_admin_url(
+            **{products_page_key: products_pagination[shop_type]["page"] + 1}
+        )
+
+    orders_filter_hidden_params: dict[str, int] = {"users_page": users_page}
+    for shop_type in SHOP_TYPES:
+        orders_filter_hidden_params[f"allowlist_page_{shop_type}"] = (
+            allowlist_pagination[shop_type]["page"]
+        )
+        orders_filter_hidden_params[f"products_page_{shop_type}"] = (
+            products_pagination[shop_type]["page"]
+        )
+
     return templates.TemplateResponse(
         "admin.html",
         {
             "request": request,
             "allowlist_by_shop": allowlist_by_shop,
+            "allowlist_pagination": allowlist_pagination,
             "settings_by_shop": settings_by_shop,
             "products_by_shop": products_by_shop,
+            "products_pagination": products_pagination,
             "users": users,
             "users_page": users_page,
-            "users_pages_total": total_pages,
+            "users_pages_total": users_pages_total,
             "users_has_prev": users_page > 1,
-            "users_has_next": users_page < total_pages,
+            "users_has_next": users_page < users_pages_total,
+            "users_prev_url": build_admin_url(users_page=users_page - 1),
+            "users_next_url": build_admin_url(users_page=users_page + 1),
             "orders": orders,
+            "orders_page": orders_page,
+            "orders_pages_total": orders_pages_total,
+            "orders_has_prev": orders_page > 1,
+            "orders_has_next": orders_page < orders_pages_total,
+            "orders_prev_url": build_admin_url(orders_page=orders_page - 1),
+            "orders_next_url": build_admin_url(orders_page=orders_page + 1),
+            "orders_reset_url": build_admin_url(
+                status="", date_from="", date_to="", orders_page=1
+            ),
+            "orders_filter_hidden_params": orders_filter_hidden_params,
             "order_statuses": ORDER_STATUSES,
             "order_status_labels": ORDER_STATUS_LABELS,
             "status_filter": resolved_status or "",

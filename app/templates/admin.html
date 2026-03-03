@@ -49,6 +49,7 @@
       <div class="panel__header">
         <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
       </div>
+      {% set allowlist_page = allowlist_pagination[shop_type] %}
       <form class="form" method="post" action="/admin/allowlist/add">
         <input type="hidden" name="shop_type" value="{{ shop_type }}" />
         <label class="field">
@@ -76,6 +77,17 @@
         </div>
         {% endfor %}
       </div>
+      {% if allowlist_page.pages_total > 1 %}
+      <div class="pagination">
+        {% if allowlist_page.has_prev %}
+        <a class="ghost" href="{{ allowlist_page.prev_url }}">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ allowlist_page.page }} / {{ allowlist_page.pages_total }}</span>
+        {% if allowlist_page.has_next %}
+        <a class="ghost" href="{{ allowlist_page.next_url }}">Вперёд</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
@@ -105,11 +117,11 @@
   {% if users_pages_total > 1 %}
   <div class="pagination">
     {% if users_has_prev %}
-    <a class="ghost" href="/admin?users_page={{ users_page - 1 }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Назад</a>
+    <a class="ghost" href="{{ users_prev_url }}">Назад</a>
     {% endif %}
     <span class="muted">Стр. {{ users_page }} / {{ users_pages_total }}</span>
     {% if users_has_next %}
-    <a class="ghost" href="/admin?users_page={{ users_page + 1 }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Вперёд</a>
+    <a class="ghost" href="{{ users_next_url }}">Вперёд</a>
     {% endif %}
   </div>
   {% endif %}
@@ -119,6 +131,10 @@
   <h2>Заказы и статусы</h2>
   <div class="orders-actions">
     <form class="form form--inline" method="get" action="/admin">
+      {% for key, value in orders_filter_hidden_params.items() %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}" />
+      {% endfor %}
+      <input type="hidden" name="orders_page" value="1" />
       <label class="field field--compact">
         <span>Статус</span>
         <select name="status">
@@ -139,7 +155,7 @@
         <input type="date" name="date_to" value="{{ date_to }}" />
       </label>
       <button class="ghost" type="submit">Фильтровать</button>
-      <a class="ghost" href="/admin">Сбросить</a>
+      <a class="ghost" href="{{ orders_reset_url }}">Сбросить</a>
     </form>
     <a class="btn btn--ghost" href="{{ export_url }}">Скачать CSV</a>
     <form
@@ -183,12 +199,24 @@
     <div class="muted">Пока нет заказов.</div>
     {% endif %}
   </div>
+  {% if orders_pages_total > 1 %}
+  <div class="pagination">
+    {% if orders_has_prev %}
+    <a class="ghost" href="{{ orders_prev_url }}">Назад</a>
+    {% endif %}
+    <span class="muted">Стр. {{ orders_page }} / {{ orders_pages_total }}</span>
+    {% if orders_has_next %}
+    <a class="ghost" href="{{ orders_next_url }}">Вперёд</a>
+    {% endif %}
+  </div>
+  {% endif %}
 </section>
 
 <section class="card panel">
   <h2>Товары и карточки</h2>
   <div class="grid grid--two">
     {% for shop_type in ["regular", "premium"] %}
+    {% set products_page = products_pagination[shop_type] %}
     <div>
       <div class="panel__header">
         <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
@@ -227,6 +255,7 @@
         <button class="btn" type="submit">Добавить товар</button>
       </form>
 
+      {% if products_by_shop[shop_type] %}
       {% for product in products_by_shop[shop_type] %}
       <div class="card subcard">
         <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data">
@@ -305,6 +334,20 @@
         </div>
       </div>
       {% endfor %}
+      {% else %}
+      <div class="muted">Для этого магазина пока нет товаров.</div>
+      {% endif %}
+      {% if products_page.pages_total > 1 %}
+      <div class="pagination">
+        {% if products_page.has_prev %}
+        <a class="ghost" href="{{ products_page.prev_url }}">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ products_page.page }} / {{ products_page.pages_total }}</span>
+        {% if products_page.has_next %}
+        <a class="ghost" href="{{ products_page.next_url }}">Вперёд</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
