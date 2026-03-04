@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.core.config import (ADMIN_PASSWORD, ORDER_STATUS_LABELS,
@@ -422,6 +422,17 @@ def admin_allowlist_remove_all(
     return RedirectResponse("/admin", status_code=303)
 
 
+@router.post("/admin/allowlist/remove-all-shops")
+def admin_allowlist_remove_all_shops(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    db.execute(delete(AllowlistEntry))
+    db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+
 @router.post("/admin/points/set")
 def admin_points_set(
     request: Request,
@@ -441,6 +452,17 @@ def admin_points_set(
         db.add(user)
     else:
         user.points = points
+    db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+
+@router.post("/admin/points/reset-all")
+def admin_points_reset_all(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    db.execute(update(User).values(points=0))
     db.commit()
     return RedirectResponse("/admin", status_code=303)
 

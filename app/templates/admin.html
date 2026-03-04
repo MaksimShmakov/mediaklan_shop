@@ -43,6 +43,14 @@
 
 <section class="card panel">
   <h2>Доступ по tg_username</h2>
+  <form
+    class="form form--inline"
+    method="post"
+    action="/admin/allowlist/remove-all-shops"
+    onsubmit="return confirm('Убрать доступ у всех пользователей во всех магазинах?');"
+  >
+    <button class="ghost ghost--danger" type="submit">Обнулить все доступы</button>
+  </form>
   <div class="grid grid--two">
     {% for shop_type in ["regular", "premium"] %}
     <div>
@@ -105,6 +113,14 @@
       <input type="number" name="points" min="0" step="1" required />
     </label>
     <button class="btn" type="submit">Установить</button>
+  </form>
+  <form
+    class="form form--inline"
+    method="post"
+    action="/admin/points/reset-all"
+    onsubmit="return confirm('Обнулить баллы у всех пользователей?');"
+  >
+    <button class="ghost ghost--danger" type="submit">Обнулить баллы всем</button>
   </form>
   <div class="list">
     {% for user in users %}
