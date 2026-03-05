@@ -1,0 +1,53 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+<section class="hero hero--compact">
+  <div>
+    <h1>Database tools</h1>
+    <p class="muted">Dedicated page for direct database operations.</p>
+  </div>
+  <div class="actions">
+    <a class="ghost" href="/admin">Back to admin</a>
+    <a class="ghost" href="/admin/logout">Logout</a>
+  </div>
+</section>
+
+<section class="card panel">
+  <h2>Hard delete user</h2>
+  <p class="muted">
+    Removes the user from table users and also deletes related orders and
+    allowlist entries.
+  </p>
+  {% if status == "deleted" %}
+  <div class="alert">
+    User {{ tg_username }} was deleted from DB. Orders removed:
+    {{ deleted_orders }}, allowlist entries removed: {{ deleted_allowlist }}.
+  </div>
+  {% elif status == "not_found" %}
+  <div class="alert">User {{ tg_username }} was not found in users table.</div>
+  {% elif status == "invalid_username" %}
+  <div class="alert">Enter a valid tg_username.</div>
+  {% endif %}
+
+  <form
+    class="form"
+    method="post"
+    action="/admin/db/users/delete"
+    onsubmit="return confirm('Delete user and all related data permanently?');"
+  >
+    <label class="field">
+      <span>tg_username</span>
+      <input
+        type="text"
+        name="tg_username"
+        placeholder="@username"
+        value="{{ tg_username }}"
+        required
+      />
+    </label>
+    <button class="ghost ghost--danger" type="submit">Delete from DB</button>
+  </form>
+</section>
+</div>
+{% endblock %}

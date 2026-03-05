@@ -48,6 +48,78 @@ def admin_logout(request: Request) -> RedirectResponse:
     return RedirectResponse("/admin/login", status_code=303)
 
 
+@router.get("/admin/db", response_class=HTMLResponse)
+def admin_db_page(
+    request: Request,
+    status: Optional[str] = None,
+    tg_username: str = "",
+    deleted_orders: int = 0,
+    deleted_allowlist: int = 0,
+) -> HTMLResponse:
+    require_admin(request)
+    normalized = normalize_tg_username(tg_username) if tg_username else ""
+    return templates.TemplateResponse(
+        "admin_db.html",
+        {
+            "request": request,
+            "status": status,
+            "tg_username": normalized,
+            "deleted_orders": max(0, deleted_orders),
+            "deleted_allowlist": max(0, deleted_allowlist),
+        },
+    )
+
+
+@router.post("/admin/db/users/delete")
+def admin_db_user_delete(
+    request: Request,
+    tg_username: str = Form(...),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    require_admin(request)
+    normalized = normalize_tg_username(tg_username)
+    if not normalized:
+        return RedirectResponse(
+            "/admin/db?status=invalid_username", status_code=303
+        )
+
+    user = db.execute(
+        select(User).where(User.tg_username == normalized)
+    ).scalar_one_or_none()
+    if not user:
+        query = urlencode({"status": "not_found", "tg_username": normalized})
+        return RedirectResponse(f"/admin/db?{query}", status_code=303)
+
+    deleted_orders = db.execute(
+        select(func.count(Order.id)).where(Order.tg_username == normalized)
+    ).scalar_one()
+    deleted_allowlist = db.execute(
+        select(func.count(AllowlistEntry.id)).where(
+            AllowlistEntry.tg_username == normalized
+        )
+    ).scalar_one()
+
+    db.execute(delete(Order).where(Order.tg_username == normalized))
+    db.execute(
+        delete(AllowlistEntry).where(AllowlistEntry.tg_username == normalized)
+    )
+    db.delete(user)
+    db.commit()
+
+    if request.session.get("tg_username") == normalized:
+        request.session.pop("tg_username", None)
+
+    query = urlencode(
+        {
+            "status": "deleted",
+            "tg_username": normalized,
+            "deleted_orders": deleted_orders,
+            "deleted_allowlist": deleted_allowlist,
+        }
+    )
+    return RedirectResponse(f"/admin/db?{query}", status_code=303)
+
+
 @router.get("/admin", response_class=HTMLResponse)
 def admin_dashboard(
     request: Request,
