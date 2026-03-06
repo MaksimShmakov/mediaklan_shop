@@ -37,16 +37,18 @@
     {% set active_variants = product.variants | selectattr('active') | list %}
     {% set variant = active_variants[0] if active_variants else None %}
     {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
+    {% set image_src = resolve_image_url(product.image_url) %}
     <article class="store-card">
       <div class="store-card__shell">
         <div class="store-card__frame">
-          {% if product.image_url %}
-          <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+          {% if image_src %}
+          <img src="{{ image_src }}" alt="{{ product.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
+          <div class="image-placeholder" hidden>Фото</div>
           {% else %}
           <div class="image-placeholder">Фото</div>
           {% endif %}
-          <div class="store-card__qty">{{ stock_value }} шт</div>
         </div>
+        <div class="store-card__qty">{{ stock_value }} шт</div>
       {% if variant %}
       <div class="store-card__price">{{ variant.points_cost }} баллов</div>
       {% endif %}

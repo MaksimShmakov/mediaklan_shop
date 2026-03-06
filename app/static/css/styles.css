@@ -1378,22 +1378,23 @@ textarea {
   width: 68%;
   height: 68%;
   object-fit: contain;
+  display: block;
 }
 
 .store-card__qty {
   position: absolute;
-  right: 1.775%;
-  top: 0.871%;
-  min-width: 21.302%;
-  height: 8.497%;
+  right: 7.396%;
+  top: 3.268%;
+  min-width: 18.639%;
+  max-width: 24.556%;
+  height: 5.446%;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  max-width: calc(100% - 12px);
-  padding: 1px 12px 0;
-  font-size: clamp(0.62rem, 0.56rem + 0.15vw, 0.7rem);
+  padding: 0 10px;
+  font-size: clamp(0.58rem, 0.54rem + 0.14vw, 0.68rem);
   font-weight: 700;
   font-family: "Inter", sans-serif;
   color: #7b66c5;

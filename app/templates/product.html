@@ -32,10 +32,12 @@
   <p>Похоже, карточка удалена или недоступна.</p>
 </section>
 {% else %}
+{% set image_src = resolve_image_url(product.image_url) %}
 <section class="card product-detail">
   <div class="product-detail__media">
-    {% if product.image_url %}
-    <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+    {% if image_src %}
+    <img src="{{ image_src }}" alt="{{ product.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
+    <div class="image-placeholder" hidden>Фото</div>
     {% else %}
     <div class="image-placeholder">Фото</div>
     {% endif %}

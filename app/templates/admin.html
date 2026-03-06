@@ -276,6 +276,7 @@
 
       {% if products_by_shop[shop_type] %}
       {% for product in products_by_shop[shop_type] %}
+      {% set image_src = resolve_image_url(product.image_url) %}
       <div class="card subcard">
         <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data">
           <input type="hidden" name="product_id" value="{{ product.id }}" />
@@ -287,9 +288,10 @@
             <span>Описание</span>
             <textarea name="description" rows="3">{{ product.description or '' }}</textarea>
           </label>
-          {% if product.image_url %}
+          {% if image_src %}
           <div class="image-preview">
-            <img src="{{ product.image_url }}" alt="Фото товара" />
+            <img src="{{ image_src }}" alt="Фото товара" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
+            <div class="image-placeholder" hidden>Фото</div>
           </div>
           {% endif %}
           <label class="field">
