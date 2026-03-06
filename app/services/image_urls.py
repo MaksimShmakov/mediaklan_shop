@@ -1,12 +1,9 @@
 from pathlib import Path
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 
 from app.core.config import ALLOWED_IMAGE_EXTS, UPLOAD_DIR
 
 STATIC_DIR = Path("app/static")
-IMAGE_PROXY_PATH = "/media/product-image"
-
-
 def _normalize_upload_path(path: str) -> str | None:
     filename = Path(path).name
     if not filename:
@@ -41,17 +38,17 @@ def resolve_image_url(image_url: str | None) -> str | None:
         return None
 
     if raw_value.startswith("www."):
-        return f"{IMAGE_PROXY_PATH}?src={quote(f'https://{raw_value}', safe='')}"
+        return f"https://{raw_value}"
 
     if raw_value.startswith("//"):
-        return f"{IMAGE_PROXY_PATH}?src={quote(f'https:{raw_value}', safe='')}"
+        return f"https:{raw_value}"
 
     parsed = urlparse(raw_value)
     scheme = parsed.scheme.lower()
     path = parsed.path or ""
 
     if scheme in {"http", "https"} and parsed.netloc:
-        return f"{IMAGE_PROXY_PATH}?src={quote(raw_value, safe='')}"
+        return raw_value
 
     if path.startswith("/static/uploads/"):
         return _normalize_upload_path(path)

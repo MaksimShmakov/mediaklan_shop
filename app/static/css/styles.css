@@ -488,6 +488,10 @@ body {
   font-weight: 600;
 }
 
+.image-placeholder[hidden] {
+  display: none !important;
+}
+
 .product-card__body {
   display: flex;
   flex-direction: column;
@@ -1384,21 +1388,18 @@ textarea {
 .store-card__qty {
   position: absolute;
   right: 7.396%;
-  top: 3.268%;
-  min-width: 18.639%;
-  max-width: 24.556%;
-  height: 5.446%;
+  top: 5.446%;
+  width: 18.343%;
+  height: 6.319%;
   border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: 0 10px;
-  font-size: clamp(0.58rem, 0.54rem + 0.14vw, 0.68rem);
+  display: grid;
+  place-items: center;
+  padding: 0 0 1px;
+  font-size: clamp(0.6rem, 0.57rem + 0.12vw, 0.68rem);
   font-weight: 700;
   font-family: "Inter", sans-serif;
   color: #7b66c5;
-  background: #ede5fc;
+  background: transparent;
   text-align: center;
   line-height: 1;
   font-variant-numeric: tabular-nums;

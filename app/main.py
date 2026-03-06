@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import SESSION_SECRET, SHOP_TYPES
 from app.core.database import SessionLocal, init_db
 from app.models import ShopSettings
-from app.routers import admin, api, auth, media, shops
+from app.routers import admin, api, auth, shops
 
 app = FastAPI()
 app.add_middleware(
@@ -16,7 +16,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth.router)
 app.include_router(shops.router)
-app.include_router(media.router)
 app.include_router(api.router)
 app.include_router(admin.router)
 
