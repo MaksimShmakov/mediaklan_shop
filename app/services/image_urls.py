@@ -12,17 +12,46 @@ def _strip_query_fragment(value: str) -> str:
 
 def _normalize_separators(value: str) -> str:
     return value.replace("\\", "/")
+
+
+def _find_upload_candidate(filename: str) -> str | None:
+    if not filename:
+        return None
+
+    direct_path = UPLOAD_DIR / filename
+    if direct_path.exists():
+        return filename
+
+    suffix = Path(filename).suffix.lower()
+    stem = Path(filename).stem
+    if not stem:
+        return None
+
+    for candidate in UPLOAD_DIR.iterdir():
+        if not candidate.is_file():
+            continue
+        if candidate.name.lower() == filename.lower():
+            return candidate.name
+
+    if suffix in ALLOWED_IMAGE_EXTS:
+        for candidate in UPLOAD_DIR.iterdir():
+            if not candidate.is_file():
+                continue
+            if candidate.stem == stem and candidate.suffix.lower() in ALLOWED_IMAGE_EXTS:
+                return candidate.name
+
+    return None
+
+
 def _normalize_upload_path(path: str) -> str | None:
-    filename = Path(path).name
+    clean_path = _strip_query_fragment(_normalize_separators(path)).rstrip("/")
+    filename = PurePosixPath(clean_path).name
     if not filename:
         return None
     if Path(filename).suffix.lower() not in ALLOWED_IMAGE_EXTS:
         return None
-    return (
-        f"/static/uploads/{filename}"
-        if (UPLOAD_DIR / filename).exists()
-        else None
-    )
+    candidate_name = _find_upload_candidate(filename)
+    return f"/static/uploads/{candidate_name}" if candidate_name else None
 
 
 def _normalize_static_path(path: str) -> str | None:

@@ -294,6 +294,9 @@
             <div class="image-placeholder" hidden>Фото</div>
           </div>
           {% endif %}
+          {% if product.image_url and not image_src %}
+          <div class="muted">Изображение не найдено: {{ product.image_url }}</div>
+          {% endif %}
           <label class="field">
             <span>Загрузить изображение</span>
             <input type="file" name="image_file" accept="image/*" />
