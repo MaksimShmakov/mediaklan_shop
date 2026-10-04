@@ -57,6 +57,8 @@
         <button
           class="store-card__buy redeem-btn"
           data-variant="{{ variant.id if variant else '' }}"
+          data-title="{{ product.title }}"
+          data-cost="{{ variant.points_cost if variant else '' }}"
           {% if not variant %}disabled{% endif %}
           {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
         >
@@ -73,5 +75,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/shop.js"></script>
+<script src="/static/js/ui.js?v=20261004-1"></script>
+<script src="/static/js/shop.js?v=20261004-1"></script>
 {% endblock %}

@@ -50,11 +50,33 @@ const redirectToResult = (code) => {
   return true;
 };
 
+const askConfirm = (message) => {
+  if (window.MKUI && window.MKUI.confirmDialog) {
+    return window.MKUI.confirmDialog(message, {
+      confirmText: "Да, покупаю",
+      cancelText: "Отмена",
+    });
+  }
+  return Promise.resolve(window.confirm(message));
+};
+
 const buttons = document.querySelectorAll(".redeem-btn");
 buttons.forEach((button) => {
   button.addEventListener("click", async () => {
     const variantId = button.dataset.variant;
     if (!variantId) return;
+    if (button.disabled) return;
+
+    const title = button.dataset.title;
+    const cost = button.dataset.cost;
+    let question = "Подтверждаешь покупку?";
+    if (title && cost) {
+      question = `Подтверждаешь покупку «${title}» за ${cost} баллов?`;
+    } else if (title) {
+      question = `Подтверждаешь покупку «${title}»?`;
+    }
+    if (!(await askConfirm(question))) return;
+
     button.disabled = true;
     const original = button.innerHTML;
     button.innerHTML = "Проверяем...";

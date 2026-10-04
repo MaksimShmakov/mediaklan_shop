@@ -2504,3 +2504,175 @@ textarea {
     font-size: 0.82rem;
   }
 }
+
+/* === Админка: сворачиваемые списки, таблица пользователей, модалка === */
+
+.collapsible {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.collapsible__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.collapsible__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapsible__caret {
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+
+.collapsible.is-collapsed .collapsible__caret {
+  transform: rotate(-90deg);
+}
+
+.collapsible.is-collapsed .collapsible__body {
+  display: none;
+}
+
+.panel__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.inline-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 4px 0 10px;
+}
+
+.list--users .list__row--user,
+.list--users .list__row--head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 92px 92px;
+  align-items: center;
+  gap: 10px;
+}
+
+.list--users .list__row--head {
+  background: transparent;
+  border: none;
+  padding-bottom: 0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(214, 214, 230, 0.6);
+}
+
+.list--users .user-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.list--users .user-points {
+  gap: 6px;
+}
+
+.list--users .user-points input {
+  width: 92px;
+}
+
+.list--users .user-access {
+  justify-content: center;
+}
+
+.user-access__label {
+  display: none;
+}
+
+form.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(12, 10, 22, 0.62);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.modal-overlay--show {
+  opacity: 1;
+}
+
+.modal {
+  width: min(420px, 100%);
+  padding: 26px 24px 22px;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #1c1b18;
+  box-shadow: 0 24px 60px rgba(20, 8, 44, 0.35);
+  transform: translateY(8px);
+  transition: transform 0.18s ease;
+}
+
+.modal-overlay--show .modal {
+  transform: translateY(0);
+}
+
+.modal__text {
+  margin: 0 0 20px;
+  font-size: 1.08rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal__confirm,
+.modal__cancel {
+  width: 100%;
+  justify-content: center;
+}
+
+.modal__cancel {
+  color: #4b4759;
+}
+
+@media (max-width: 720px) {
+  .list--users .list__row--user,
+  .list--users .list__row--head {
+    grid-template-columns: minmax(0, 1fr) 120px;
+    row-gap: 8px;
+  }
+
+  .list--users .list__row--head {
+    display: none;
+  }
+
+  .list--users .user-access {
+    justify-content: flex-start;
+  }
+
+  .user-access__label {
+    display: inline;
+  }
+}

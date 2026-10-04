@@ -6,7 +6,8 @@ from urllib.parse import urlencode
 
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import (HTMLResponse, JSONResponse, RedirectResponse,
+                               Response)
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
@@ -21,8 +22,30 @@ from app.services.orders import build_export_url, build_order_filters
 from app.services.products import parse_optional_int, parse_variants_raw
 from app.services.shops import get_shop_settings
 from app.services.uploads import delete_image_file, save_image_upload
+from app.services.users import parse_bulk_users
 
 router = APIRouter()
+
+
+def is_ajax(request: Request) -> bool:
+    return request.headers.get("x-requested-with") == "fetch"
+
+
+def admin_response(
+    request: Request,
+    message: str = "Готово",
+    **extra: object,
+) -> Response:
+    """Ответ на действие админки.
+
+    Для fetch-запросов отдаём JSON, чтобы страница не перезагружалась,
+    для обычной отправки формы — привычный редирект.
+    """
+    if is_ajax(request):
+        payload: dict[str, object] = {"ok": True, "message": message}
+        payload.update(extra)
+        return JSONResponse(payload)
+    return RedirectResponse("/admin", status_code=303)
 
 
 @router.get("/admin/login", response_class=HTMLResponse)
@@ -207,18 +230,49 @@ def admin_dashboard(
             "has_next": page < pages_total,
         }
 
-    total_users = db.execute(select(func.count(User.id))).scalar_one()
+    # Единый список людей: и зарегистрированные пользователи,
+    # и те, кому доступ выдан заранее, до регистрации.
+    people_by_username: dict[str, dict] = {}
+    for username, points in db.execute(
+        select(User.tg_username, User.points)
+    ).all():
+        people_by_username[username] = {
+            "tg_username": username,
+            "points": points,
+            "registered": True,
+            "access": set(),
+        }
+    for username, shop_type in db.execute(
+        select(AllowlistEntry.tg_username, AllowlistEntry.shop_type)
+    ).all():
+        person = people_by_username.setdefault(
+            username,
+            {
+                "tg_username": username,
+                "points": 0,
+                "registered": False,
+                "access": set(),
+            },
+        )
+        person["access"].add(shop_type)
+
+    people_all = sorted(
+        people_by_username.values(),
+        key=lambda person: (-(person["points"] or 0), person["tg_username"]),
+    )
+    for person in people_all:
+        for shop_type in SHOP_TYPES:
+            person[f"has_{shop_type}"] = shop_type in person["access"]
+
+    total_users = len(people_all)
     users_pages_total = max(
         1, (total_users + users_per_page - 1) // users_per_page
     )
     if users_page > users_pages_total:
         users_page = users_pages_total
-    users = db.execute(
-        select(User)
-        .order_by(User.points.desc())
-        .offset((users_page - 1) * users_per_page)
-        .limit(users_per_page)
-    ).scalars().all()
+    people = people_all[
+        (users_page - 1) * users_per_page: users_page * users_per_page
+    ]
 
     filters, resolved_status, _, _ = build_order_filters(
         status, date_from, date_to
@@ -326,7 +380,8 @@ def admin_dashboard(
             "settings_by_shop": settings_by_shop,
             "products_by_shop": products_by_shop,
             "products_pagination": products_pagination,
-            "users": users,
+            "people": people,
+            "people_total": total_users,
             "users_page": users_page,
             "users_pages_total": users_pages_total,
             "users_has_prev": users_page > 1,
@@ -363,7 +418,7 @@ def admin_orders_export(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     db: Session = Depends(get_db),
-) -> StreamingResponse:
+) -> Response:
     require_admin(request)
     filters, _, _, _ = build_order_filters(status, date_from, date_to)
     query = (
@@ -378,37 +433,49 @@ def admin_orders_export(
     if filters:
         query = query.where(*filters)
     rows = db.execute(query).all()
-    output = io.StringIO()
-    writer = csv.writer(output)
+    # Excel ожидает разделитель ";" и кодировку UTF-8 с BOM,
+    # иначе кириллица открывается кракозябрами.
+    output = io.StringIO(newline="")
+    writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
     writer.writerow(
         [
-            "order_id",
-            "created_at",
+            "Номер заказа",
+            "Дата и время",
             "tg_username",
-            "shop_type",
-            "product_title",
-            "variant_label",
-            "points_spent",
-            "status",
+            "Магазин",
+            "Товар",
+            "Номинал",
+            "Списано баллов",
+            "Статус",
         ]
     )
+    shop_labels = {"regular": "Обычный", "premium": "Премиум"}
     for order, variant, product in rows:
+        created_at = order.created_at
         writer.writerow(
             [
                 order.id,
-                order.created_at.isoformat() if order.created_at else "",
+                created_at.strftime("%d.%m.%Y %H:%M") if created_at else "",
                 order.tg_username,
-                product.shop_type if product else "",
+                shop_labels.get(
+                    product.shop_type if product else "",
+                    product.shop_type if product else "",
+                ),
                 product.title if product else "",
                 variant.label if variant else "",
                 order.points_spent,
                 ORDER_STATUS_LABELS.get(order.status, order.status),
             ]
         )
-    output.seek(0)
     filename = f"orders_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.csv"
-    headers = {"Content-Disposition": f"attachment; filename={filename}"}
-    return StreamingResponse(output, media_type="text/csv", headers=headers)
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+    }
+    return Response(
+        content=output.getvalue().encode("utf-8-sig"),
+        media_type="text/csv; charset=utf-8",
+        headers=headers,
+    )
 
 
 @router.post("/admin/allowlist/add")
@@ -417,7 +484,7 @@ def admin_allowlist_add(
     shop_type: str = Form(...),
     tg_username: str = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
@@ -433,7 +500,7 @@ def admin_allowlist_add(
     if not exists:
         db.add(AllowlistEntry(tg_username=normalized, shop_type=shop_type))
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Доступ выдан")
 
 
 @router.post("/admin/allowlist/remove")
@@ -441,13 +508,13 @@ def admin_allowlist_remove(
     request: Request,
     entry_id: int = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     entry = db.get(AllowlistEntry, entry_id)
     if entry:
         db.delete(entry)
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Доступ убран")
 
 
 @router.post("/admin/allowlist/add-all")
@@ -455,7 +522,7 @@ def admin_allowlist_add_all(
     request: Request,
     shop_type: str = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
@@ -475,7 +542,7 @@ def admin_allowlist_add_all(
     if entries:
         db.add_all(entries)
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Доступ выдан всем пользователям")
 
 
 @router.post("/admin/allowlist/remove-all")
@@ -483,7 +550,7 @@ def admin_allowlist_remove_all(
     request: Request,
     shop_type: str = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
@@ -491,18 +558,18 @@ def admin_allowlist_remove_all(
         delete(AllowlistEntry).where(AllowlistEntry.shop_type == shop_type)
     )
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Доступ убран у всех в этом магазине")
 
 
 @router.post("/admin/allowlist/remove-all-shops")
 def admin_allowlist_remove_all_shops(
     request: Request,
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     db.execute(delete(AllowlistEntry))
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Доступы обнулены")
 
 
 @router.post("/admin/points/set")
@@ -511,7 +578,7 @@ def admin_points_set(
     tg_username: str = Form(...),
     points: int = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     normalized = normalize_tg_username(tg_username)
     if not normalized:
@@ -525,18 +592,135 @@ def admin_points_set(
     else:
         user.points = points
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Баллы сохранены")
+
+
+@router.post("/admin/users/bulk")
+def admin_users_bulk(
+    request: Request,
+    raw: str = Form(""),
+    shop_regular: Optional[str] = Form(None),
+    shop_premium: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Добавляет сразу список пользователей: доступы и баллы одним списком."""
+    require_admin(request)
+    entries, errors = parse_bulk_users(raw)
+    if not entries:
+        message = "Не нашли ни одной строки вида «@username 500»"
+        if is_ajax(request):
+            return JSONResponse({"ok": False, "message": message}, 400)
+        return RedirectResponse("/admin", status_code=303)
+
+    selected_shops = [
+        shop_type
+        for shop_type, flag in (
+            ("regular", shop_regular), ("premium", shop_premium)
+        )
+        if flag
+    ]
+
+    usernames = [entry["tg_username"] for entry in entries]
+    existing_users = {
+        user.tg_username: user
+        for user in db.execute(
+            select(User).where(User.tg_username.in_(usernames))
+        ).scalars().all()
+    }
+    existing_access = {
+        (username, shop_type)
+        for username, shop_type in db.execute(
+            select(
+                AllowlistEntry.tg_username, AllowlistEntry.shop_type
+            ).where(AllowlistEntry.tg_username.in_(usernames))
+        ).all()
+    }
+
+    created_users = 0
+    points_updated = 0
+    access_granted = 0
+    for entry in entries:
+        username = entry["tg_username"]
+        points = entry["points"]
+        user = existing_users.get(username)
+        if not user:
+            user = User(tg_username=username, points=points or 0)
+            db.add(user)
+            created_users += 1
+            if points is not None:
+                points_updated += 1
+        elif points is not None and user.points != points:
+            user.points = points
+            points_updated += 1
+
+        for shop_type in selected_shops:
+            if (username, shop_type) in existing_access:
+                continue
+            db.add(
+                AllowlistEntry(tg_username=username, shop_type=shop_type)
+            )
+            existing_access.add((username, shop_type))
+            access_granted += 1
+    db.commit()
+
+    parts = [f"Обработано строк: {len(entries)}"]
+    if created_users:
+        parts.append(f"новых: {created_users}")
+    if points_updated:
+        parts.append(f"баллы: {points_updated}")
+    if access_granted:
+        parts.append(f"доступы: {access_granted}")
+    if errors:
+        shown = ", ".join(errors[:3])
+        parts.append(f"пропущено строк: {len(errors)} ({shown})")
+    return admin_response(request, ". ".join(parts))
+
+
+@router.post("/admin/users/access")
+def admin_user_access(
+    request: Request,
+    tg_username: str = Form(...),
+    shop_type: str = Form(...),
+    enabled: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+) -> Response:
+    require_admin(request)
+    if shop_type not in SHOP_TYPES:
+        raise HTTPException(status_code=400)
+    normalized = normalize_tg_username(tg_username)
+    if not normalized:
+        raise HTTPException(status_code=400)
+
+    entry = db.execute(
+        select(AllowlistEntry).where(
+            AllowlistEntry.tg_username == normalized,
+            AllowlistEntry.shop_type == shop_type,
+        )
+    ).scalar_one_or_none()
+
+    if enabled:
+        if not entry:
+            db.add(
+                AllowlistEntry(tg_username=normalized, shop_type=shop_type)
+            )
+            db.commit()
+        return admin_response(request, f"Доступ выдан: {normalized}")
+
+    if entry:
+        db.delete(entry)
+        db.commit()
+    return admin_response(request, f"Доступ убран: {normalized}")
 
 
 @router.post("/admin/points/reset-all")
 def admin_points_reset_all(
     request: Request,
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     db.execute(update(User).values(points=0))
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Баллы обнулены у всех")
 
 
 @router.post("/admin/settings/set")
@@ -546,7 +730,7 @@ def admin_settings_set(
     opens_at: str = Form(""),
     closes_at: str = Form(""),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
@@ -559,7 +743,7 @@ def admin_settings_set(
         closes_at
     ) if closes_at else None
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Окно работы сохранено")
 
 
 @router.post("/admin/product/add")
@@ -574,7 +758,7 @@ def admin_product_add(
     position: int = Form(0),
     active: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
@@ -601,7 +785,7 @@ def admin_product_add(
         )
         db.add(variant)
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Товар добавлен")
 
 
 @router.post("/admin/product/update")
@@ -615,7 +799,7 @@ def admin_product_update(
     position: int = Form(0),
     active: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     product = db.get(Product, product_id)
     if product:
@@ -629,7 +813,7 @@ def admin_product_update(
         product.position = position
         product.active = active == "on"
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Товар сохранён")
 
 
 @router.post("/admin/product/photo/delete")
@@ -637,14 +821,14 @@ def admin_product_photo_delete(
     request: Request,
     product_id: int = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     product = db.get(Product, product_id)
     if product and product.image_url:
         delete_image_file(product.image_url)
         product.image_url = None
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Фото удалено")
 
 
 @router.post("/admin/product/delete")
@@ -652,13 +836,13 @@ def admin_product_delete(
     request: Request,
     product_id: int = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     product = db.get(Product, product_id)
     if product:
         db.delete(product)
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Товар удалён")
 
 
 @router.post("/admin/order/status")
@@ -667,7 +851,7 @@ def admin_order_status(
     order_id: int = Form(...),
     status: str = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     if status not in ORDER_STATUSES:
         raise HTTPException(status_code=400)
@@ -675,18 +859,18 @@ def admin_order_status(
     if order:
         order.status = status
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Статус заказа обновлён")
 
 
 @router.post("/admin/orders/clear")
 def admin_orders_clear(
     request: Request,
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     db.execute(delete(Order))
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Все заказы удалены")
 
 
 @router.post("/admin/variant/add")
@@ -699,7 +883,7 @@ def admin_variant_add(
     position: Optional[int] = Form(None),
     active: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     product = db.get(Product, product_id)
     if not product:
@@ -715,7 +899,7 @@ def admin_variant_add(
     )
     db.add(variant)
     db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Вариант добавлен")
 
 
 @router.post("/admin/variant/update")
@@ -728,7 +912,7 @@ def admin_variant_update(
     position: Optional[int] = Form(None),
     active: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     variant = db.get(ProductVariant, variant_id)
     if variant:
@@ -739,7 +923,7 @@ def admin_variant_update(
             variant.position = position
         variant.active = active == "on"
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Вариант сохранён")
 
 
 @router.post("/admin/variant/delete")
@@ -747,10 +931,10 @@ def admin_variant_delete(
     request: Request,
     variant_id: int = Form(...),
     db: Session = Depends(get_db),
-) -> RedirectResponse:
+) -> Response:
     require_admin(request)
     variant = db.get(ProductVariant, variant_id)
     if variant:
         db.delete(variant)
         db.commit()
-    return RedirectResponse("/admin", status_code=303)
+    return admin_response(request, "Вариант удалён")

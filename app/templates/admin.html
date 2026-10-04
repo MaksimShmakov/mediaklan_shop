@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="admin-page">
@@ -12,12 +12,12 @@
   </div>
 </section>
 
-<section class="card panel">
+<section class="card panel" id="panel-settings">
   <h2>Окна работы магазинов</h2>
   <div class="grid grid--two">
     {% for shop_type in ["regular", "premium"] %}
     {% set settings = settings_by_shop[shop_type] %}
-    <form class="form" method="post" action="/admin/settings/set">
+    <form class="form" method="post" action="/admin/settings/set" data-ajax>
       <input type="hidden" name="shop_type" value="{{ shop_type }}" />
       <div class="panel__header">
         <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
@@ -44,112 +44,158 @@
   </div>
 </section>
 
-<section class="card panel">
-  <h2>Доступ по tg_username</h2>
-  <form
-    class="form form--inline"
-    method="post"
-    action="/admin/allowlist/remove-all-shops"
-    onsubmit="return confirm('Убрать доступ у всех пользователей во всех магазинах?');"
-  >
-    <button class="ghost ghost--danger" type="submit">Обнулить все доступы</button>
+<section class="card panel" id="panel-users">
+  <h2>Доступ по tg_username и баллы пользователей</h2>
+
+  <form class="form" method="post" action="/admin/users/bulk" data-ajax data-refresh="#panel-users">
+    <label class="field">
+      <span>Добавить списком: каждая строка «@username 500»</span>
+      <textarea
+        name="raw"
+        rows="6"
+        placeholder="@anna_k 500&#10;@max_dev 1250&#10;@lena_art"
+      ></textarea>
+      <small class="hint">
+        Баллы можно не указывать — тогда у существующего пользователя они не изменятся.
+        Разделитель — пробел, запятая, точка с запятой или табуляция (можно вставить из Excel).
+      </small>
+    </label>
+    <div class="inline-options">
+      <label class="checkbox">
+        <input type="checkbox" name="shop_regular" checked />
+        <span>Доступ в обычный магазин</span>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" name="shop_premium" />
+        <span>Доступ в премиум магазин</span>
+      </label>
+    </div>
+    <button class="btn" type="submit">Добавить всех из списка</button>
   </form>
-  <div class="grid grid--two">
+
+  <div class="panel__tools">
+    <form class="form form--inline" method="post" action="/admin/points/set" data-ajax data-refresh="#panel-users">
+      <label class="field field--compact">
+        <span>tg_username</span>
+        <input type="text" name="tg_username" placeholder="@username" required />
+      </label>
+      <label class="field field--compact">
+        <span>Баллы</span>
+        <input type="number" name="points" min="0" step="1" required />
+      </label>
+      <button class="btn btn--ghost" type="submit">Установить баллы</button>
+    </form>
     {% for shop_type in ["regular", "premium"] %}
-    <div>
-      <div class="panel__header">
-        <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
-      </div>
-      {% set allowlist_page = allowlist_pagination[shop_type] %}
-      <form class="form" method="post" action="/admin/allowlist/add">
-        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
-        <label class="field">
+    <form class="form form--inline" method="post" action="/admin/allowlist/add-all" data-ajax data-refresh="#panel-users">
+      <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+      <button class="ghost" type="submit">
+        Дать доступ всем: {{ "обычный" if shop_type == "regular" else "премиум" }}
+      </button>
+    </form>
+    <form
+      class="form form--inline"
+      method="post"
+      action="/admin/allowlist/remove-all"
+      data-ajax
+      data-refresh="#panel-users"
+      data-confirm="Убрать доступ у всех пользователей для этого магазина?"
+    >
+      <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+      <button class="ghost" type="submit">
+        Убрать доступ всем: {{ "обычный" if shop_type == "regular" else "премиум" }}
+      </button>
+    </form>
+    {% endfor %}
+    <form
+      class="form form--inline"
+      method="post"
+      action="/admin/points/reset-all"
+      data-ajax
+      data-refresh="#panel-users"
+      data-confirm="Обнулить баллы у всех пользователей?"
+    >
+      <button class="ghost ghost--danger" type="submit">Обнулить баллы всем</button>
+    </form>
+    <form
+      class="form form--inline"
+      method="post"
+      action="/admin/allowlist/remove-all-shops"
+      data-ajax
+      data-refresh="#panel-users"
+      data-confirm="Убрать доступ у всех пользователей во всех магазинах?"
+    >
+      <button class="ghost ghost--danger" type="submit">Обнулить все доступы</button>
+    </form>
+  </div>
+
+  <div class="collapsible" data-collapse="users">
+    <div class="collapsible__head">
+      <button class="ghost collapsible__toggle" type="button" data-collapse-toggle>
+        <span class="collapsible__caret" aria-hidden="true">▾</span>
+        <span class="collapsible__label">Список пользователей</span>
+      </button>
+      <span class="muted">{{ people_total }} всего</span>
+    </div>
+    <div class="collapsible__body">
+      <div class="list list--users">
+        {% if people %}
+        <div class="list__row list__row--head">
           <span>tg_username</span>
-          <input type="text" name="tg_username" placeholder="@username" required />
-        </label>
-        <button class="btn btn--ghost" type="submit">Добавить</button>
-      </form>
-      <form class="form form--inline" method="post" action="/admin/allowlist/add-all">
-        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
-        <button class="ghost" type="submit">Добавить всех</button>
-      </form>
-      <form class="form form--inline" method="post" action="/admin/allowlist/remove-all" onsubmit="return confirm('Убрать доступ у всех пользователей для этого магазина?');">
-        <input type="hidden" name="shop_type" value="{{ shop_type }}" />
-        <button class="ghost" type="submit">Убрать всех</button>
-      </form>
-      <div class="list">
-        {% for entry in allowlist_by_shop[shop_type] %}
-        <div class="list__row">
-          <span>{{ entry.tg_username }}</span>
-          <form method="post" action="/admin/allowlist/remove">
-            <input type="hidden" name="entry_id" value="{{ entry.id }}" />
-            <button class="ghost" type="submit">Убрать</button>
+          <span>Баллы</span>
+          <span>Обычный</span>
+          <span>Премиум</span>
+        </div>
+        {% for person in people %}
+        <div class="list__row list__row--user">
+          <span class="user-name">
+            {{ person.tg_username }}
+            {% if not person.registered %}<small class="muted">не зарегистрирован</small>{% endif %}
+          </span>
+          <form class="form form--inline user-points" method="post" action="/admin/points/set" data-ajax>
+            <input type="hidden" name="tg_username" value="{{ person.tg_username }}" />
+            <input type="number" name="points" min="0" step="1" value="{{ person.points or 0 }}" />
+            <button class="ghost" type="submit">ОК</button>
           </form>
+          {% for shop_type in ["regular", "premium"] %}
+          <form class="form form--inline user-access" method="post" action="/admin/users/access" data-ajax>
+            <input type="hidden" name="tg_username" value="{{ person.tg_username }}" />
+            <input type="hidden" name="shop_type" value="{{ shop_type }}" />
+            <label class="checkbox">
+              <input
+                type="checkbox"
+                name="enabled"
+                data-autosubmit
+                {% if person['has_' ~ shop_type] %}checked{% endif %}
+              />
+              <span class="user-access__label">{{ "Обычный" if shop_type == "regular" else "Премиум" }}</span>
+            </label>
+          </form>
+          {% endfor %}
         </div>
         {% endfor %}
-      </div>
-      {% if allowlist_page.pages_total > 1 %}
-      <div class="pagination">
-        {% if allowlist_page.has_prev %}
-        <a class="ghost" href="{{ allowlist_page.prev_url }}">Назад</a>
+        {% else %}
+        <div class="muted">Пока нет ни одного пользователя.</div>
         {% endif %}
-        <span class="muted">Стр. {{ allowlist_page.page }} / {{ allowlist_page.pages_total }}</span>
-        {% if allowlist_page.has_next %}
-        <a class="ghost" href="{{ allowlist_page.next_url }}">Вперёд</a>
+      </div>
+      {% if users_pages_total > 1 %}
+      <div class="pagination">
+        {% if users_has_prev %}
+        <a class="ghost" href="{{ users_prev_url }}" data-ajax-link data-refresh="#panel-users">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ users_page }} / {{ users_pages_total }}</span>
+        {% if users_has_next %}
+        <a class="ghost" href="{{ users_next_url }}" data-ajax-link data-refresh="#panel-users">Вперёд</a>
         {% endif %}
       </div>
       {% endif %}
     </div>
-    {% endfor %}
   </div>
 </section>
 
-<section class="card panel">
-  <h2>Баллы пользователей</h2>
-  <form class="form form--inline" method="post" action="/admin/points/set">
-    <label class="field">
-      <span>tg_username</span>
-      <input type="text" name="tg_username" placeholder="@username" required />
-    </label>
-    <label class="field">
-      <span>Баллы</span>
-      <input type="number" name="points" min="0" step="1" required />
-    </label>
-    <button class="btn" type="submit">Установить</button>
-  </form>
-  <form
-    class="form form--inline"
-    method="post"
-    action="/admin/points/reset-all"
-    onsubmit="return confirm('Обнулить баллы у всех пользователей?');"
-  >
-    <button class="ghost ghost--danger" type="submit">Обнулить баллы всем</button>
-  </form>
-  <div class="list">
-    {% for user in users %}
-    <div class="list__row">
-      <span>{{ user.tg_username }}</span>
-      <span class="pill pill--inline">{{ user.points }} баллов</span>
-    </div>
-    {% endfor %}
-  </div>
-  {% if users_pages_total > 1 %}
-  <div class="pagination">
-    {% if users_has_prev %}
-    <a class="ghost" href="{{ users_prev_url }}">Назад</a>
-    {% endif %}
-    <span class="muted">Стр. {{ users_page }} / {{ users_pages_total }}</span>
-    {% if users_has_next %}
-    <a class="ghost" href="{{ users_next_url }}">Вперёд</a>
-    {% endif %}
-  </div>
-  {% endif %}
-</section>
-
-<section class="card panel">
+<section class="card panel" id="panel-orders">
   <h2>Заказы и статусы</h2>
   <div class="orders-actions">
-    <form class="form form--inline" method="get" action="/admin">
+    <form class="form form--inline" method="get" action="/admin" data-ajax-get data-refresh="#panel-orders">
       {% for key, value in orders_filter_hidden_params.items() %}
       <input type="hidden" name="{{ key }}" value="{{ value }}" />
       {% endfor %}
@@ -174,64 +220,77 @@
         <input type="date" name="date_to" value="{{ date_to }}" />
       </label>
       <button class="ghost" type="submit">Фильтровать</button>
-      <a class="ghost" href="{{ orders_reset_url }}">Сбросить</a>
+      <a class="ghost" href="{{ orders_reset_url }}" data-ajax-link data-refresh="#panel-orders">Сбросить</a>
     </form>
     <a class="btn btn--ghost" href="{{ export_url }}">Скачать CSV</a>
     <form
       class="form form--inline"
       method="post"
       action="/admin/orders/clear"
-      onsubmit="return confirm('Удалить все заказы без возможности восстановления?');"
+      data-ajax
+      data-refresh="#panel-orders"
+      data-confirm="Удалить все заказы без возможности восстановления?"
     >
       <button class="ghost ghost--danger" type="submit">
         Очистить все заказы
       </button>
     </form>
   </div>
-  <div class="list">
-    {% if orders %}
-    {% for item in orders %}
-    <div class="list__row list__row--stack">
-      <div class="list__main">
-        <strong>{{ item.product_title or "Товар" }}</strong>
-        <span class="muted">{{ item.variant_label }}</span>
-        <span class="pill pill--muted">{{ item.order.points_spent }} баллов</span>
-        <span class="muted">{{ item.order.tg_username }}</span>
-      </div>
-      <form class="form form--inline" method="post" action="/admin/order/status">
-        <input type="hidden" name="order_id" value="{{ item.order.id }}" />
-        <label class="field field--compact">
-          <span>Статус</span>
-          <select name="status">
-            {% for status in order_statuses %}
-            <option value="{{ status }}" {% if item.order.status == status %}selected{% endif %}>
-              {{ order_status_labels[status] }}
-            </option>
-            {% endfor %}
-          </select>
-        </label>
-        <button class="ghost" type="submit">Сохранить</button>
-      </form>
+  <div class="collapsible" data-collapse="orders">
+    <div class="collapsible__head">
+      <button class="ghost collapsible__toggle" type="button" data-collapse-toggle>
+        <span class="collapsible__caret" aria-hidden="true">▾</span>
+        <span class="collapsible__label">Список заказов</span>
+      </button>
+      <span class="muted">{{ orders | length }} на этой странице</span>
     </div>
-    {% endfor %}
-    {% else %}
-    <div class="muted">Пока нет заказов.</div>
-    {% endif %}
+    <div class="collapsible__body">
+      <div class="list">
+        {% if orders %}
+        {% for item in orders %}
+        <div class="list__row list__row--stack">
+          <div class="list__main">
+            <strong>{{ item.product_title or "Товар" }}</strong>
+            <span class="muted">{{ item.variant_label }}</span>
+            <span class="pill pill--muted">{{ item.order.points_spent }} баллов</span>
+            <span class="muted">{{ item.order.tg_username }}</span>
+          </div>
+          <form class="form form--inline" method="post" action="/admin/order/status" data-ajax>
+            <input type="hidden" name="order_id" value="{{ item.order.id }}" />
+            <label class="field field--compact">
+              <span>Статус</span>
+              <select name="status" data-autosubmit>
+                {% for status in order_statuses %}
+                <option value="{{ status }}" {% if item.order.status == status %}selected{% endif %}>
+                  {{ order_status_labels[status] }}
+                </option>
+                {% endfor %}
+              </select>
+            </label>
+            <button class="ghost" type="submit">Сохранить</button>
+          </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="muted">Пока нет заказов.</div>
+        {% endif %}
+      </div>
+      {% if orders_pages_total > 1 %}
+      <div class="pagination">
+        {% if orders_has_prev %}
+        <a class="ghost" href="{{ orders_prev_url }}" data-ajax-link data-refresh="#panel-orders">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ orders_page }} / {{ orders_pages_total }}</span>
+        {% if orders_has_next %}
+        <a class="ghost" href="{{ orders_next_url }}" data-ajax-link data-refresh="#panel-orders">Вперёд</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
   </div>
-  {% if orders_pages_total > 1 %}
-  <div class="pagination">
-    {% if orders_has_prev %}
-    <a class="ghost" href="{{ orders_prev_url }}">Назад</a>
-    {% endif %}
-    <span class="muted">Стр. {{ orders_page }} / {{ orders_pages_total }}</span>
-    {% if orders_has_next %}
-    <a class="ghost" href="{{ orders_next_url }}">Вперёд</a>
-    {% endif %}
-  </div>
-  {% endif %}
 </section>
 
-<section class="card panel">
+<section class="card panel" id="panel-products">
   <h2>Товары и карточки</h2>
   <div class="grid grid--two">
     {% for shop_type in ["regular", "premium"] %}
@@ -240,7 +299,7 @@
       <div class="panel__header">
         <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
       </div>
-      <form class="form" method="post" action="/admin/product/add" enctype="multipart/form-data">
+      <form class="form" method="post" action="/admin/product/add" enctype="multipart/form-data" data-ajax data-refresh="#panel-products">
         <input type="hidden" name="shop_type" value="{{ shop_type }}" />
         <label class="field">
           <span>Название</span>
@@ -278,7 +337,7 @@
       {% for product in products_by_shop[shop_type] %}
       {% set image_src = resolve_image_url(product.image_url) %}
       <div class="card subcard">
-        <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data">
+        <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data" data-ajax>
           <input type="hidden" name="product_id" value="{{ product.id }}" />
           <label class="field">
             <span>Название</span>
@@ -314,12 +373,19 @@
           </div>
         </form>
         {% if product.image_url %}
-        <form method="post" action="/admin/product/photo/delete" class="form form--inline">
+        <form method="post" action="/admin/product/photo/delete" class="form form--inline" data-ajax data-refresh="#panel-products">
           <input type="hidden" name="product_id" value="{{ product.id }}" />
           <button class="ghost" type="submit">Удалить фото</button>
         </form>
         {% endif %}
-        <form method="post" action="/admin/product/delete" class="form form--inline">
+        <form
+          method="post"
+          action="/admin/product/delete"
+          class="form form--inline"
+          data-ajax
+          data-refresh="#panel-products"
+          data-confirm="Удалить товар «{{ product.title }}»?"
+        >
           <input type="hidden" name="product_id" value="{{ product.id }}" />
           <button class="ghost" type="submit">Удалить товар</button>
         </form>
@@ -327,7 +393,7 @@
         <div class="variants">
           <h4>Варианты</h4>
           {% for variant in product.variants %}
-          <form class="form form--inline" method="post" action="/admin/variant/update">
+          <form class="form form--inline" method="post" action="/admin/variant/update" data-ajax>
             <input type="hidden" name="variant_id" value="{{ variant.id }}" />
             <input type="text" name="label" value="{{ variant.label }}" required />
             <input type="number" name="points_cost" min="0" step="1" value="{{ variant.points_cost }}" required />
@@ -338,13 +404,13 @@
             </label>
             <button class="ghost" type="submit">Сохранить</button>
           </form>
-          <form method="post" action="/admin/variant/delete" class="form form--inline">
+          <form method="post" action="/admin/variant/delete" class="form form--inline" data-ajax data-refresh="#panel-products">
             <input type="hidden" name="variant_id" value="{{ variant.id }}" />
             <button class="ghost" type="submit">Удалить</button>
           </form>
           {% endfor %}
 
-          <form class="form form--inline" method="post" action="/admin/variant/add">
+          <form class="form form--inline" method="post" action="/admin/variant/add" data-ajax data-refresh="#panel-products">
             <input type="hidden" name="product_id" value="{{ product.id }}" />
             <input type="text" name="label" placeholder="Номинал" required />
             <input type="number" name="points_cost" min="0" step="1" placeholder="Баллы" required />
@@ -364,11 +430,11 @@
       {% if products_page.pages_total > 1 %}
       <div class="pagination">
         {% if products_page.has_prev %}
-        <a class="ghost" href="{{ products_page.prev_url }}">Назад</a>
+        <a class="ghost" href="{{ products_page.prev_url }}" data-ajax-link data-refresh="#panel-products">Назад</a>
         {% endif %}
         <span class="muted">Стр. {{ products_page.page }} / {{ products_page.pages_total }}</span>
         {% if products_page.has_next %}
-        <a class="ghost" href="{{ products_page.next_url }}">Вперёд</a>
+        <a class="ghost" href="{{ products_page.next_url }}" data-ajax-link data-refresh="#panel-products">Вперёд</a>
         {% endif %}
       </div>
       {% endif %}
@@ -377,4 +443,10 @@
   </div>
 </section>
 </div>
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/ui.js?v=20261004-1"></script>
+<script src="/static/js/admin.js?v=20261004-1"></script>
 {% endblock %}
