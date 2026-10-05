@@ -54,6 +54,7 @@
         data-variant="{{ variant.id }}"
         data-title="{{ product.title }} — {{ variant.label }}"
         data-cost="{{ variant.points_cost }}"
+        {% if preview %}disabled title="В режиме редактора покупка недоступна"{% endif %}
         {% if variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
       >
         <span>{{ variant.label }}</span>
@@ -75,6 +76,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/ui.js?v=20261004-1"></script>
-<script src="/static/js/shop.js?v=20261004-1"></script>
+<script src="/static/js/ui.js?v=20261005-2"></script>
+<script src="/static/js/shop.js?v=20261005-2"></script>
 {% endblock %}

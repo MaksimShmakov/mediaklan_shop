@@ -150,6 +150,7 @@ def admin_dashboard(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     users_page: int = 1,
+    user_search: str = "",
     orders_page: int = 1,
     allowlist_page_regular: int = 1,
     allowlist_page_premium: int = 1,
@@ -256,8 +257,13 @@ def admin_dashboard(
         )
         person["access"].add(shop_type)
 
+    search_query = (user_search or "").strip().lstrip("@").lower()
     people_all = sorted(
-        people_by_username.values(),
+        (
+            person
+            for person in people_by_username.values()
+            if not search_query or search_query in person["tg_username"]
+        ),
         key=lambda person: (-(person["points"] or 0), person["tg_username"]),
     )
     for person in people_all:
@@ -319,6 +325,7 @@ def admin_dashboard(
             "date_from": date_from or "",
             "date_to": date_to or "",
             "users_page": users_page,
+            "user_search": user_search or "",
             "orders_page": orders_page,
         }
         for shop_type in SHOP_TYPES:
@@ -382,6 +389,7 @@ def admin_dashboard(
             "products_pagination": products_pagination,
             "people": people,
             "people_total": total_users,
+            "user_search": user_search or "",
             "users_page": users_page,
             "users_pages_total": users_pages_total,
             "users_has_prev": users_page > 1,
@@ -542,7 +550,9 @@ def admin_allowlist_add_all(
     if entries:
         db.add_all(entries)
         db.commit()
-    return admin_response(request, "Доступ выдан всем пользователям")
+    return admin_response(
+        request, f"Доступ выдан пользователям: {len(entries)}"
+    )
 
 
 @router.post("/admin/allowlist/remove-all")
@@ -554,11 +564,18 @@ def admin_allowlist_remove_all(
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
+    removed = db.execute(
+        select(func.count(AllowlistEntry.id)).where(
+            AllowlistEntry.shop_type == shop_type
+        )
+    ).scalar_one()
     db.execute(
         delete(AllowlistEntry).where(AllowlistEntry.shop_type == shop_type)
     )
     db.commit()
-    return admin_response(request, "Доступ убран у всех в этом магазине")
+    return admin_response(
+        request, f"Доступ убран у всех в этом магазине: {removed}"
+    )
 
 
 @router.post("/admin/allowlist/remove-all-shops")
@@ -567,9 +584,10 @@ def admin_allowlist_remove_all_shops(
     db: Session = Depends(get_db),
 ) -> Response:
     require_admin(request)
+    removed = db.execute(select(func.count(AllowlistEntry.id))).scalar_one()
     db.execute(delete(AllowlistEntry))
     db.commit()
-    return admin_response(request, "Доступы обнулены")
+    return admin_response(request, f"Доступы обнулены: {removed}")
 
 
 @router.post("/admin/points/set")
@@ -593,6 +611,33 @@ def admin_points_set(
         user.points = points
     db.commit()
     return admin_response(request, "Баллы сохранены")
+
+
+@router.post("/admin/users/access/clear")
+def admin_user_access_clear(
+    request: Request,
+    tg_username: str = Form(...),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Убирает доступ одному человеку сразу во всех магазинах."""
+    require_admin(request)
+    normalized = normalize_tg_username(tg_username)
+    if not normalized:
+        raise HTTPException(status_code=400)
+    removed = db.execute(
+        select(func.count(AllowlistEntry.id)).where(
+            AllowlistEntry.tg_username == normalized
+        )
+    ).scalar_one()
+    if removed:
+        db.execute(
+            delete(AllowlistEntry).where(
+                AllowlistEntry.tg_username == normalized
+            )
+        )
+        db.commit()
+        return admin_response(request, f"Доступ убран: {normalized}")
+    return admin_response(request, f"У {normalized} и так не было доступа")
 
 
 @router.post("/admin/users/bulk")

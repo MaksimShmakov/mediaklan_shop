@@ -2557,9 +2557,23 @@ textarea {
 .list--users .list__row--user,
 .list--users .list__row--head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px 92px 92px;
+  grid-template-columns: minmax(0, 1fr) 150px 92px 92px 140px;
   align-items: center;
   gap: 10px;
+}
+
+.users-search {
+  flex: 1 1 240px;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.users-search input[type="search"] {
+  min-width: 180px;
+}
+
+.list--users .user-clear {
+  justify-content: flex-end;
 }
 
 .list--users .list__row--head {
@@ -2664,6 +2678,15 @@ form.is-busy {
     row-gap: 8px;
   }
 
+  .list--users .user-clear {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .users-search {
+    justify-content: flex-start;
+  }
+
   .list--users .list__row--head {
     display: none;
   }
@@ -2675,4 +2698,23 @@ form.is-busy {
   .user-access__label {
     display: inline;
   }
+}
+
+/* Плашка предпросмотра витрины для редактора */
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a2438;
+  font-size: 0.95rem;
+  box-shadow: 0 10px 30px rgba(28, 10, 60, 0.18);
+}
+
+.preview-bar .ghost {
+  margin-left: auto;
 }

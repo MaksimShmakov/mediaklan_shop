@@ -4,6 +4,14 @@
 
 {% block content %}
 {% set is_message_state = (not allowed) or (not open_now) %}
+{% if preview %}
+<div class="preview-bar">
+  <strong>Режим редактора.</strong>
+  Так витрину видят участники. Покупка недоступна{% if settings and settings.opens_at and settings.closes_at %},
+  окно продаж: {{ settings.opens_at.strftime('%d.%m %H:%M') }} — {{ settings.closes_at.strftime('%d.%m %H:%M') }}{% endif %}.
+  <a class="ghost" href="/admin">Вернуться в админку</a>
+</div>
+{% endif %}
 <section class="store-panel{% if is_message_state %} store-panel--message{% endif %}" data-shop-type="{{ shop_type }}">
   {% if not is_message_state %}
   <div class="store-hero">
@@ -59,6 +67,7 @@
           data-variant="{{ variant.id if variant else '' }}"
           data-title="{{ product.title }}"
           data-cost="{{ variant.points_cost if variant else '' }}"
+          {% if preview %}disabled title="В режиме редактора покупка недоступна"{% endif %}
           {% if not variant %}disabled{% endif %}
           {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
         >
@@ -75,6 +84,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/ui.js?v=20261004-1"></script>
-<script src="/static/js/shop.js?v=20261004-1"></script>
+<script src="/static/js/ui.js?v=20261005-2"></script>
+<script src="/static/js/shop.js?v=20261005-2"></script>
 {% endblock %}

@@ -7,6 +7,8 @@
     <h1>Админ панель</h1>
   </div>
   <div class="actions">
+    <a class="ghost" href="/shop/regular" target="_blank" rel="noopener">Витрина: обычный</a>
+    <a class="ghost" href="/shop/premium" target="_blank" rel="noopener">Витрина: премиум</a>
     <a class="ghost" href="/admin/db">Работа с БД</a>
     <a class="ghost" href="/admin/logout">Выйти</a>
   </div>
@@ -134,7 +136,20 @@
         <span class="collapsible__caret" aria-hidden="true">▾</span>
         <span class="collapsible__label">Список пользователей</span>
       </button>
-      <span class="muted">{{ people_total }} всего</span>
+      <form class="form form--inline users-search" method="get" action="/admin" data-ajax-get data-refresh="#panel-users">
+        <input type="hidden" name="users_page" value="1" />
+        <label class="field field--compact">
+          <span class="sr-only">Поиск по нику</span>
+          <input type="search" name="user_search" value="{{ user_search }}" placeholder="Поиск по нику" />
+        </label>
+        <button class="ghost" type="submit">Найти</button>
+        {% if user_search %}
+        <a class="ghost" href="/admin" data-ajax-link data-refresh="#panel-users">Сбросить</a>
+        {% endif %}
+      </form>
+      <span class="muted">
+        {% if user_search %}найдено: {{ people_total }}{% else %}{{ people_total }} всего{% endif %}
+      </span>
     </div>
     <div class="collapsible__body">
       <div class="list list--users">
@@ -144,6 +159,7 @@
           <span>Баллы</span>
           <span>Обычный</span>
           <span>Премиум</span>
+          <span></span>
         </div>
         {% for person in people %}
         <div class="list__row list__row--user">
@@ -171,6 +187,17 @@
             </label>
           </form>
           {% endfor %}
+          <form
+            class="form form--inline user-clear"
+            method="post"
+            action="/admin/users/access/clear"
+            data-ajax
+            data-refresh="#panel-users"
+            data-confirm="Убрать доступ у {{ person.tg_username }} во всех магазинах?"
+          >
+            <input type="hidden" name="tg_username" value="{{ person.tg_username }}" />
+            <button class="ghost" type="submit">Убрать доступ</button>
+          </form>
         </div>
         {% endfor %}
         {% else %}
@@ -447,6 +474,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/ui.js?v=20261004-1"></script>
-<script src="/static/js/admin.js?v=20261004-1"></script>
+<script src="/static/js/ui.js?v=20261005-2"></script>
+<script src="/static/js/admin.js?v=20261005-2"></script>
 {% endblock %}

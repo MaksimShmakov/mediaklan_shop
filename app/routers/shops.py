@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
@@ -32,9 +34,24 @@ RESULT_PAGES = {
 }
 
 
+def get_viewer(request: Request, db: Session):
+    """Пользователь витрины и признак «вошёл в админку».
+
+    Редактор может посмотреть каталог закрытого магазина, даже если
+    не залогинен как участник, — но купить ничего не сможет.
+    """
+    is_admin = bool(request.session.get("is_admin"))
+    user = get_current_user(request, db)
+    if user:
+        return user, is_admin
+    if is_admin:
+        return SimpleNamespace(tg_username="режим редактора", points=0), True
+    return None, False
+
+
 @router.get("/shops", response_class=HTMLResponse)
 def shops(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
-    user = get_current_user(request, db)
+    user, is_admin = get_viewer(request, db)
     if not user:
         return RedirectResponse("/login", status_code=303)
     now = local_now()
@@ -42,8 +59,10 @@ def shops(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
     for shop_type in SHOP_TYPES:
         settings = get_shop_settings(db, shop_type)
         status_map[shop_type] = {
-            "allowed": has_access(db, user.tg_username, shop_type),
-            "open": is_shop_open(settings, now),
+            "allowed": is_admin or has_access(
+                db, user.tg_username, shop_type
+            ),
+            "open": is_admin or is_shop_open(settings, now),
             "opens_at": settings.opens_at if settings else None,
             "closes_at": settings.closes_at if settings else None,
         }
@@ -53,6 +72,7 @@ def shops(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
             "request": request,
             "user": user,
             "status_map": status_map,
+            "preview": is_admin,
         },
     )
 
@@ -65,13 +85,16 @@ def shop_view(
 ) -> HTMLResponse:
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=404)
-    user = get_current_user(request, db)
+    user, is_admin = get_viewer(request, db)
     if not user:
         return RedirectResponse("/login", status_code=303)
 
-    allowed = has_access(db, user.tg_username, shop_type)
     settings = get_shop_settings(db, shop_type)
-    open_now = is_shop_open(settings, local_now())
+    has_rights = has_access(db, user.tg_username, shop_type)
+    shop_open = is_shop_open(settings, local_now())
+    preview = is_admin and not (has_rights and shop_open)
+    allowed = has_rights or preview
+    open_now = shop_open or preview
 
     products = []
     if allowed and open_now:
@@ -97,6 +120,7 @@ def shop_view(
             "open_now": open_now,
             "settings": settings,
             "products": products,
+            "preview": preview,
         },
     )
 
@@ -112,13 +136,16 @@ def product_detail(
 ) -> HTMLResponse:
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=404)
-    user = get_current_user(request, db)
+    user, is_admin = get_viewer(request, db)
     if not user:
         return RedirectResponse("/login", status_code=303)
 
-    allowed = has_access(db, user.tg_username, shop_type)
     settings = get_shop_settings(db, shop_type)
-    open_now = is_shop_open(settings, local_now())
+    has_rights = has_access(db, user.tg_username, shop_type)
+    shop_open = is_shop_open(settings, local_now())
+    preview = is_admin and not (has_rights and shop_open)
+    allowed = has_rights or preview
+    open_now = shop_open or preview
 
     product = None
     if allowed and open_now:
@@ -144,6 +171,7 @@ def product_detail(
             "open_now": open_now,
             "settings": settings,
             "product": product,
+            "preview": preview,
         },
     )
 
