@@ -26,7 +26,7 @@ from app.services.orders import build_export_url, build_order_filters
 from app.services.products import parse_optional_int, parse_variants_raw
 from app.services.shops import get_shop_settings
 from app.services.uploads import delete_image_file, save_image_upload
-from app.services.users import parse_bulk_users, parse_delete_usernames
+from app.services.users import parse_bulk_users, parse_delete_usernames, split_delete_entries
 
 router = APIRouter()
 
@@ -465,7 +465,15 @@ def admin_users_delete_bulk(
     try:
         if confirmed != "yes":
             raise ValueError("Подтвердите удаление пользователей, их баллов, заказов и доступов.")
-        usernames = parse_delete_usernames(raw)
+        candidates = [normalize_tg_username(entry) for entry in split_delete_entries(raw)]
+        existing: set[str] = set()
+        for offset in range(0, len(candidates), 400):
+            batch = candidates[offset:offset + 400]
+            for model in (User, AllowlistEntry, Order):
+                existing.update(db.execute(
+                    select(model.tg_username).where(model.tg_username.in_(batch))
+                ).scalars())
+        usernames = parse_delete_usernames(raw, existing)
     except ValueError as error:
         return JSONResponse({"ok": False, "message": str(error)}, status_code=400)
 
