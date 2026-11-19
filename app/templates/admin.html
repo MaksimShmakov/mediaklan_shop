@@ -48,6 +48,28 @@
 
 <section class="card panel" id="panel-users">
   <h2>Доступ по tg_username и баллы пользователей</h2>
+  <p><a class="btn btn--ghost" href="/admin/users/export">Скачать всех пользователей и баллы — Excel</a></p>
+  <p class="hint">Выгружается весь список, независимо от поиска и страницы. Для ников без регистрации баллы равны 0.</p>
+  {% if users_delete_message %}<div class="alert">{{ users_delete_message }}</div>{% endif %}
+  <details>
+    <summary>Удалить пользователей списком</summary>
+    <form class="form" method="post" action="/admin/users/delete-bulk" data-ajax data-reset="1"
+          data-refresh="#panel-users, #panel-orders"
+          data-confirm="Безвозвратно удалить перечисленные Telegram-ники, их аккаунты, баллы, заказы и доступы?">
+      <input type="hidden" name="csrf_token" value="{{ request.session['users_delete_csrf'] }}" />
+      <label class="field">
+        <span>Telegram-ники для удаления</span>
+        <textarea name="raw" rows="6" maxlength="65536" required placeholder="@anna_k&#10;@max_dev"></textarea>
+        <small class="hint">Только ники, без баллов: по одному на строку или через пробел, запятую, точку с запятой. С @ или без, максимум 1000. Повторы учитываются один раз.</small>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" name="confirmed" value="yes" required />
+        <span>Подтверждаю безвозвратное удаление аккаунтов, баллов, заказов и доступов перечисленных пользователей, как в «Работе с БД».</span>
+      </label>
+      <button class="ghost ghost--danger" type="submit">Удалить пользователей из списка</button>
+    </form>
+  </details>
+
 
   <form class="form" method="post" action="/admin/users/bulk" data-ajax data-refresh="#panel-users">
     <label class="field">

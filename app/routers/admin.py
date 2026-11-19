@@ -1,5 +1,6 @@
 import csv
 import io
+import secrets
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urlencode
@@ -8,6 +9,9 @@ from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
                      UploadFile)
 from fastapi.responses import (HTMLResponse, JSONResponse, RedirectResponse,
                                Response)
+from openpyxl import Workbook
+from openpyxl.cell import WriteOnlyCell
+
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
@@ -22,7 +26,7 @@ from app.services.orders import build_export_url, build_order_filters
 from app.services.products import parse_optional_int, parse_variants_raw
 from app.services.shops import get_shop_settings
 from app.services.uploads import delete_image_file, save_image_upload
-from app.services.users import parse_bulk_users
+from app.services.users import parse_bulk_users, parse_delete_usernames
 
 router = APIRouter()
 
@@ -159,6 +163,7 @@ def admin_dashboard(
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     require_admin(request)
+    request.session.setdefault("users_delete_csrf", secrets.token_urlsafe(32))
 
     users_per_page = 50
     orders_per_page = 30
@@ -389,6 +394,7 @@ def admin_dashboard(
             "products_pagination": products_pagination,
             "people": people,
             "people_total": total_users,
+            "users_delete_message": request.session.pop("users_delete_message", ""),
             "user_search": user_search or "",
             "users_page": users_page,
             "users_pages_total": users_pages_total,
@@ -417,6 +423,78 @@ def admin_dashboard(
             ),
         },
     )
+
+
+@router.get("/admin/users/export")
+def admin_users_export(request: Request, db: Session = Depends(get_db)) -> Response:
+    require_admin(request)
+    people = dict(db.execute(select(User.tg_username, User.points)).all())
+    for username in db.execute(select(AllowlistEntry.tg_username)).scalars():
+        people.setdefault(username, 0)
+    workbook = Workbook(write_only=True)
+    sheet = workbook.create_sheet("Пользователи")
+    sheet.append(["Telegram", "Баллы"])
+    for username, points in sorted(people.items(), key=lambda item: (-(item[1] or 0), item[0])):
+        # Explicit text cells prevent legacy usernames from becoming Excel formulas.
+        cell = WriteOnlyCell(sheet, value=username)
+        cell.data_type = "s"
+        sheet.append([cell, points or 0])
+    output = io.BytesIO()
+    workbook.save(output)
+    filename = f"users_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.xlsx"
+    return Response(
+        output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"',
+                 "Cache-Control": "no-store"},
+    )
+
+
+@router.post("/admin/users/delete-bulk")
+def admin_users_delete_bulk(
+    request: Request,
+    raw: str = Form(""),
+    confirmed: str = Form(""),
+    csrf_token: str = Form(""),
+    db: Session = Depends(get_db),
+) -> Response:
+    require_admin(request)
+    expected = request.session.get("users_delete_csrf", "")
+    if not expected or not secrets.compare_digest(csrf_token.encode(), expected.encode()):
+        raise HTTPException(status_code=403, detail="Обновите страницу и повторите попытку.")
+    try:
+        if confirmed != "yes":
+            raise ValueError("Подтвердите удаление пользователей, их баллов, заказов и доступов.")
+        usernames = parse_delete_usernames(raw)
+    except ValueError as error:
+        return JSONResponse({"ok": False, "message": str(error)}, status_code=400)
+
+    found: set[str] = set()
+    counts = {"users": 0, "orders": 0, "allowlist": 0}
+    # Keep parameter counts within SQLite and PostgreSQL limits; commit once.
+    try:
+        for offset in range(0, len(usernames), 400):
+            batch = usernames[offset:offset + 400]
+            for model, key in ((Order, "orders"), (AllowlistEntry, "allowlist"), (User, "users")):
+                found.update(db.execute(
+                    select(model.tg_username).where(model.tg_username.in_(batch))
+                ).scalars())
+                result = db.execute(delete(model).where(model.tg_username.in_(batch)))
+                counts[key] += result.rowcount
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    if request.session.get("tg_username") in found:
+        request.session.pop("tg_username", None)
+    message = (
+        f"Удалено ников: {len(found)}; аккаунтов: {counts['users']}; "
+        f"заказов: {counts['orders']}; доступов: {counts['allowlist']}. "
+        f"Не найдено: {len(set(usernames) - found)}."
+    )
+    if not is_ajax(request):
+        request.session["users_delete_message"] = message
+    return admin_response(request, message, deleted=counts, missing=len(set(usernames) - found))
 
 
 @router.get("/admin/orders/export")

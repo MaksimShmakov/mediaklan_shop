@@ -1,3 +1,5 @@
+import re
+
 from typing import Optional
 
 from app.services.auth import normalize_tg_username
@@ -52,3 +54,18 @@ def parse_bulk_users(raw: str) -> tuple[list[dict], list[str]]:
         parsed.append({"tg_username": username, "points": points})
 
     return parsed, errors
+
+
+def parse_delete_usernames(raw: str) -> list[str]:
+    """Validate the entire list before any destructive operation."""
+    if len(raw) > 65536:
+        raise ValueError("Список слишком большой (максимум 1000 ников).")
+    tokens = [token for token in re.split(r"[\s,;|]+", raw.strip()) if token]
+    if not tokens:
+        raise ValueError("Введите хотя бы один Telegram-ник.")
+    if any(not re.fullmatch(r"@?[A-Za-z][A-Za-z0-9_]{0,31}", token) for token in tokens):
+        raise ValueError("Вставьте только Telegram-ники, без баллов и ссылок. Ничего не удалено.")
+    usernames = list(dict.fromkeys(normalize_tg_username(token) for token in tokens))
+    if len(usernames) > 1000:
+        raise ValueError("За один раз можно удалить не более 1000 ников.")
+    return usernames
