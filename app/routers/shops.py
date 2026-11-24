@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import SHOP_TYPES
 from app.core.database import get_db
@@ -100,11 +100,11 @@ def shop_view(
     if allowed and open_now:
         products = (
             db.execute(
-                select(Product)
+                select(Product).options(selectinload(Product.variants))
                 .where(
                     Product.shop_type == shop_type, Product.active.is_(True)
                 )
-                .order_by(Product.position, Product.created_at)
+                .order_by(Product.position, Product.created_at, Product.id)
             )
             .scalars()
             .all()

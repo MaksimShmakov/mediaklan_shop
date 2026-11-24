@@ -7,6 +7,8 @@ APP_TZ = os.getenv("APP_TZ", "Europe/Moscow")
 
 UPLOAD_DIR = Path("app/static/uploads")
 ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}
+MAX_IMAGE_BYTES = 15 * 1024 * 1024
+MAX_IMAGE_PIXELS = 40_000_000
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_GROUP_CHAT_ID = os.getenv("TG_GROUP_CHAT_ID")

@@ -13,7 +13,7 @@ from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
 from sqlalchemy import delete, func, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import (ADMIN_PASSWORD, ORDER_STATUS_LABELS,
                              ORDER_STATUSES, SHOP_TYPES)
@@ -23,7 +23,7 @@ from app.models import (AllowlistEntry, Order, Product, ProductVariant,
                         ShopSettings, User)
 from app.services.auth import normalize_tg_username, require_admin
 from app.services.orders import build_export_url, build_order_filters
-from app.services.products import parse_optional_int, parse_variants_raw
+from app.services.products import validate_product_fields
 from app.services.shops import get_shop_settings
 from app.services.uploads import delete_image_file, save_image_upload
 from app.services.users import parse_bulk_users, parse_delete_usernames, split_delete_entries
@@ -168,7 +168,7 @@ def admin_dashboard(
     users_per_page = 50
     orders_per_page = 30
     allowlist_per_page = 30
-    products_per_page = 8
+    products_per_page = 30
 
     users_page = max(1, users_page)
     orders_page = max(1, orders_page)
@@ -223,9 +223,9 @@ def admin_dashboard(
         )
         page = min(products_page_by_shop.get(shop_type, 1), pages_total)
         products_by_shop[shop_type] = db.execute(
-            select(Product)
+            select(Product).options(selectinload(Product.variants))
             .where(Product.shop_type == shop_type)
-            .order_by(Product.position, Product.created_at)
+            .order_by(Product.position, Product.created_at, Product.id)
             .offset((page - 1) * products_per_page)
             .limit(products_per_page)
         ).scalars().all()
@@ -885,7 +885,8 @@ def admin_product_add(
     description: str = Form(""),
     image_url: Optional[str] = Form(None),
     image_file: Optional[UploadFile] = File(None),
-    variants_raw: str = Form(""),
+    points_cost: int = Form(...),
+    stock: Optional[str] = Form(None),
     position: int = Form(0),
     active: Optional[str] = Form(None),
     db: Session = Depends(get_db),
@@ -893,6 +894,7 @@ def admin_product_add(
     require_admin(request)
     if shop_type not in SHOP_TYPES:
         raise HTTPException(status_code=400)
+    quantity = validate_product_fields(title, points_cost, stock, position)
     upload_url = save_image_upload(image_file)
     final_image_url = upload_url or (image_url.strip() if image_url else None)
     product = Product(
@@ -905,16 +907,10 @@ def admin_product_add(
     )
     db.add(product)
     db.flush()
-    for variant_data in parse_variants_raw(variants_raw):
-        variant = ProductVariant(
-            product_id=product.id,
-            label=variant_data["label"],
-            points_cost=variant_data["points_cost"],
-            stock=variant_data["stock"],
-            position=variant_data["position"],
-            active=True,
-        )
-        db.add(variant)
+    db.add(ProductVariant(
+        product_id=product.id, label="", points_cost=points_cost,
+        stock=quantity, position=0, active=True,
+    ))
     db.commit()
     return admin_response(request, "Товар добавлен")
 
@@ -924,6 +920,8 @@ def admin_product_update(
     request: Request,
     product_id: int = Form(...),
     title: str = Form(...),
+    points_cost: int = Form(...),
+    stock: Optional[str] = Form(None),
     description: str = Form(""),
     image_url: Optional[str] = Form(None),
     image_file: Optional[UploadFile] = File(None),
@@ -932,18 +930,28 @@ def admin_product_update(
     db: Session = Depends(get_db),
 ) -> Response:
     require_admin(request)
+    quantity = validate_product_fields(title, points_cost, stock, position)
     product = db.get(Product, product_id)
-    if product:
-        upload_url = save_image_upload(image_file)
-        product.title = title.strip()
-        product.description = description.strip() or None
-        if upload_url:
-            product.image_url = upload_url
-        elif image_url is not None:
-            product.image_url = image_url.strip() or None
-        product.position = position
-        product.active = active == "on"
-        db.commit()
+    if not product:
+        raise HTTPException(404, "Товар не найден")
+    if len(product.variants) > 1:
+        raise HTTPException(409, "Перезапустите приложение для обновления каталога")
+    upload_url = save_image_upload(image_file)
+    product.title = title.strip()
+    product.description = description.strip() or None
+    if upload_url:
+        product.image_url = upload_url
+    elif image_url is not None:
+        product.image_url = image_url.strip() or None
+    product.position = position
+    product.active = active == "on"
+    if not product.variants:
+        product.variants.append(ProductVariant(label="", position=0))
+    variant = product.variants[0]
+    variant.points_cost = points_cost
+    variant.stock = quantity
+    variant.active = True
+    db.commit()
     return admin_response(request, "Товар сохранён")
 
 
@@ -956,7 +964,11 @@ def admin_product_photo_delete(
     require_admin(request)
     product = db.get(Product, product_id)
     if product and product.image_url:
-        delete_image_file(product.image_url)
+        shared = db.scalar(select(func.count(Product.id)).where(
+            Product.image_url == product.image_url, Product.id != product.id,
+        ))
+        if not shared:
+            delete_image_file(product.image_url)
         product.image_url = None
         db.commit()
     return admin_response(request, "Фото удалено")
@@ -971,6 +983,13 @@ def admin_product_delete(
     require_admin(request)
     product = db.get(Product, product_id)
     if product:
+        has_orders = db.scalar(select(Order.id).join(ProductVariant).where(
+            ProductVariant.product_id == product.id,
+        ).limit(1))
+        if has_orders:
+            product.active = False
+            db.commit()
+            return admin_response(request, "Товар снят с продажи; история заказов сохранена")
         db.delete(product)
         db.commit()
     return admin_response(request, "Товар удалён")
@@ -1005,67 +1024,8 @@ def admin_orders_clear(
 
 
 @router.post("/admin/variant/add")
-def admin_variant_add(
-    request: Request,
-    product_id: int = Form(...),
-    label: str = Form(...),
-    points_cost: int = Form(...),
-    stock: Optional[str] = Form(None),
-    position: Optional[int] = Form(None),
-    active: Optional[str] = Form(None),
-    db: Session = Depends(get_db),
-) -> Response:
-    require_admin(request)
-    product = db.get(Product, product_id)
-    if not product:
-        raise HTTPException(status_code=404)
-    final_position = position if position is not None else 0
-    variant = ProductVariant(
-        product_id=product_id,
-        label=label.strip(),
-        points_cost=points_cost,
-        stock=parse_optional_int(stock),
-        position=final_position,
-        active=active == "on",
-    )
-    db.add(variant)
-    db.commit()
-    return admin_response(request, "Вариант добавлен")
-
-
 @router.post("/admin/variant/update")
-def admin_variant_update(
-    request: Request,
-    variant_id: int = Form(...),
-    label: str = Form(...),
-    points_cost: int = Form(...),
-    stock: Optional[str] = Form(None),
-    position: Optional[int] = Form(None),
-    active: Optional[str] = Form(None),
-    db: Session = Depends(get_db),
-) -> Response:
-    require_admin(request)
-    variant = db.get(ProductVariant, variant_id)
-    if variant:
-        variant.label = label.strip()
-        variant.points_cost = points_cost
-        variant.stock = parse_optional_int(stock)
-        if position is not None:
-            variant.position = position
-        variant.active = active == "on"
-        db.commit()
-    return admin_response(request, "Вариант сохранён")
-
-
 @router.post("/admin/variant/delete")
-def admin_variant_delete(
-    request: Request,
-    variant_id: int = Form(...),
-    db: Session = Depends(get_db),
-) -> Response:
+def admin_variant_retired(request: Request) -> Response:
     require_admin(request)
-    variant = db.get(ProductVariant, variant_id)
-    if variant:
-        db.delete(variant)
-        db.commit()
-    return admin_response(request, "Вариант удалён")
+    raise HTTPException(410, "Варианты больше не используются. Обновите страницу и редактируйте товар.")

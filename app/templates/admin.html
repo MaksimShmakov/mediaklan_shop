@@ -340,156 +340,70 @@
 </section>
 
 <section class="card panel" id="panel-products">
-  <h2>Товары и карточки</h2>
-  <div class="grid grid--two">
-    {% for shop_type in ["regular", "premium"] %}
-    {% set products_page = products_pagination[shop_type] %}
-    <div>
-      <div class="panel__header">
-        <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
-      </div>
-      <form class="form" method="post" action="/admin/product/add" enctype="multipart/form-data" data-ajax data-refresh="#panel-products">
+  <h2>Товары</h2>
+  {% for shop_type in ["regular", "premium"] %}
+  {% set products_page = products_pagination[shop_type] %}
+  <section class="catalog-section">
+    <h3>{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h3>
+    <details class="catalog-add">
+      <summary class="ghost">Добавить товар</summary>
+      <form class="form" method="post" action="/admin/product/add" enctype="multipart/form-data" data-ajax data-reset="1" data-refresh="#panel-products">
         <input type="hidden" name="shop_type" value="{{ shop_type }}" />
-        <label class="field">
-          <span>Название</span>
-          <input type="text" name="title" required />
-        </label>
-        <label class="field">
-          <span>Описание</span>
-          <textarea name="description" rows="3"></textarea>
-        </label>
-        <label class="field">
-          <span>Загрузить изображение</span>
-          <input type="file" name="image_file" accept="image/*" />
-        </label>
-        <label class="field">
-          <span>Варианты (каждая строка: Номинал | Баллы | Кол-во)</span>
-          <textarea
-            name="variants_raw"
-            rows="3"
-            placeholder="Номинал 1000 | 1500 | 10&#10;Номинал 2000 | 2800"
-          ></textarea>
-          <small class="hint">Кол-во можно не указывать, тогда вариант будет безлимитным.</small>
-        </label>
-        <label class="field">
-          <span>Позиция</span>
-          <input type="number" name="position" min="0" step="1" value="0" />
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="active" checked />
-          <span>Активный товар</span>
-        </label>
+        {% set product = None %}
+        {% include "product_fields.html" %}
         <button class="btn" type="submit">Добавить товар</button>
       </form>
-
-      {% if products_by_shop[shop_type] %}
+    </details>
+    <div class="catalog-list">
+      <div class="catalog-summary catalog-heading" aria-hidden="true">
+        <span>Фото</span><span>Название / описание</span><span>Стоимость</span><span>Количество</span><span>Позиция</span><span>Статус</span><span></span>
+      </div>
       {% for product in products_by_shop[shop_type] %}
+      {% set variant = product.variants[0] if product.variants else None %}
       {% set image_src = resolve_image_url(product.image_url) %}
-      <div class="card subcard">
-        <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data" data-ajax>
-          <input type="hidden" name="product_id" value="{{ product.id }}" />
-          <label class="field">
-            <span>Название</span>
-            <input type="text" name="title" value="{{ product.title }}" required />
-          </label>
-          <label class="field">
-            <span>Описание</span>
-            <textarea name="description" rows="3">{{ product.description or '' }}</textarea>
-          </label>
-          {% if image_src %}
-          <div class="image-preview">
-            <img src="{{ image_src }}" alt="Фото товара" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
-            <div class="image-placeholder" hidden>Фото</div>
-          </div>
-          {% endif %}
-          {% if product.image_url and not image_src %}
-          <div class="muted">Изображение не найдено: {{ product.image_url }}</div>
-          {% endif %}
-          <label class="field">
-            <span>Загрузить изображение</span>
-            <input type="file" name="image_file" accept="image/*" />
-          </label>
-          <label class="field">
-            <span>Позиция</span>
-            <input type="number" name="position" min="0" step="1" value="{{ product.position }}" />
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" name="active" {% if product.active %}checked{% endif %} />
-            <span>Активный товар</span>
-          </label>
-          <div class="actions">
-            <button class="btn btn--ghost" type="submit">Сохранить</button>
-          </div>
-        </form>
-        {% if product.image_url %}
-        <form method="post" action="/admin/product/photo/delete" class="form form--inline" data-ajax data-refresh="#panel-products">
-          <input type="hidden" name="product_id" value="{{ product.id }}" />
-          <button class="ghost" type="submit">Удалить фото</button>
-        </form>
-        {% endif %}
-        <form
-          method="post"
-          action="/admin/product/delete"
-          class="form form--inline"
-          data-ajax
-          data-refresh="#panel-products"
-          data-confirm="Удалить товар «{{ product.title }}»?"
-        >
-          <input type="hidden" name="product_id" value="{{ product.id }}" />
-          <button class="ghost" type="submit">Удалить товар</button>
-        </form>
-
-        <div class="variants">
-          <h4>Варианты</h4>
-          {% for variant in product.variants %}
-          <form class="form form--inline" method="post" action="/admin/variant/update" data-ajax>
-            <input type="hidden" name="variant_id" value="{{ variant.id }}" />
-            <input type="text" name="label" value="{{ variant.label }}" required />
-            <input type="number" name="points_cost" min="0" step="1" value="{{ variant.points_cost }}" required />
-            <input type="number" name="stock" min="0" step="1" value="{{ variant.stock if variant.stock is not none else '' }}" placeholder="∞" />
-            <label class="checkbox">
-              <input type="checkbox" name="active" {% if variant.active %}checked{% endif %} />
-              <span>Активен</span>
-            </label>
-            <button class="ghost" type="submit">Сохранить</button>
-          </form>
-          <form method="post" action="/admin/variant/delete" class="form form--inline" data-ajax data-refresh="#panel-products">
-            <input type="hidden" name="variant_id" value="{{ variant.id }}" />
-            <button class="ghost" type="submit">Удалить</button>
-          </form>
-          {% endfor %}
-
-          <form class="form form--inline" method="post" action="/admin/variant/add" data-ajax data-refresh="#panel-products">
+      <details class="catalog-item">
+        <summary class="catalog-summary">
+          {% if image_src %}<img class="catalog-thumb" src="{{ image_src }}" alt="" loading="lazy" />{% else %}<span class="catalog-thumb catalog-no-photo">Нет фото</span>{% endif %}
+          <span class="catalog-name"><strong>{{ product.title }}</strong><small>{{ product.description or '' }}</small></span>
+          <span>{{ variant.points_cost if variant else 0 }} баллов</span>
+          <span>{{ variant.stock if variant and variant.stock is not none else '∞' }} шт.</span>
+          <span>№ {{ product.position }}</span>
+          <span class="{{ 'catalog-active' if product.active else 'muted' }}">{{ 'Активен' if product.active else 'Неактивен' }}</span>
+          <span class="catalog-edit-label">Изменить ▾</span>
+        </summary>
+        <div class="catalog-editor">
+          <form class="form" method="post" action="/admin/product/update" enctype="multipart/form-data" data-ajax data-refresh="#panel-products">
             <input type="hidden" name="product_id" value="{{ product.id }}" />
-            <input type="text" name="label" placeholder="Номинал" required />
-            <input type="number" name="points_cost" min="0" step="1" placeholder="Баллы" required />
-            <input type="number" name="stock" min="0" step="1" placeholder="Кол-во или пусто" />
-            <label class="checkbox">
-              <input type="checkbox" name="active" checked />
-              <span>Активен</span>
-            </label>
-            <button class="btn btn--ghost" type="submit">Добавить вариант</button>
+            {% include "product_fields.html" %}
+            <button class="btn" type="submit">Сохранить товар</button>
           </form>
+          <div class="actions">
+            {% if product.image_url %}
+            <form method="post" action="/admin/product/photo/delete" data-ajax data-refresh="#panel-products" data-confirm="Удалить фото этого товара?">
+              <input type="hidden" name="product_id" value="{{ product.id }}" />
+              <button class="ghost" type="submit">Удалить фото</button>
+            </form>
+            {% endif %}
+            <form method="post" action="/admin/product/delete" data-ajax data-refresh="#panel-products" data-confirm="Удалить товар «{{ product.title }}»? Если по нему есть заказы, он будет снят с продажи с сохранением истории.">
+              <input type="hidden" name="product_id" value="{{ product.id }}" />
+              <button class="ghost ghost--danger" type="submit">Удалить товар</button>
+            </form>
+          </div>
         </div>
-      </div>
-      {% endfor %}
+      </details>
       {% else %}
-      <div class="muted">Для этого магазина пока нет товаров.</div>
-      {% endif %}
-      {% if products_page.pages_total > 1 %}
-      <div class="pagination">
-        {% if products_page.has_prev %}
-        <a class="ghost" href="{{ products_page.prev_url }}" data-ajax-link data-refresh="#panel-products">Назад</a>
-        {% endif %}
-        <span class="muted">Стр. {{ products_page.page }} / {{ products_page.pages_total }}</span>
-        {% if products_page.has_next %}
-        <a class="ghost" href="{{ products_page.next_url }}" data-ajax-link data-refresh="#panel-products">Вперёд</a>
-        {% endif %}
-      </div>
-      {% endif %}
+      <p class="muted">Для этого магазина пока нет товаров.</p>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
+    {% if products_page.pages_total > 1 %}
+    <div class="pagination">
+      {% if products_page.has_prev %}<a class="ghost" href="{{ products_page.prev_url }}" data-ajax-link data-refresh="#panel-products">Назад</a>{% endif %}
+      <span class="muted">Стр. {{ products_page.page }} / {{ products_page.pages_total }}</span>
+      {% if products_page.has_next %}<a class="ghost" href="{{ products_page.next_url }}" data-ajax-link data-refresh="#panel-products">Вперёд</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  {% endfor %}
 </section>
 </div>
 <div class="toast" id="toast"></div>
@@ -497,5 +411,5 @@
 
 {% block scripts %}
 <script src="/static/js/ui.js?v=20261005-2"></script>
-<script src="/static/js/admin.js?v=20261005-2"></script>
+<script src="/static/js/admin.js?v=20261124-1"></script>
 {% endblock %}

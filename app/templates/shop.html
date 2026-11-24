@@ -15,11 +15,7 @@
 <section class="store-panel{% if is_message_state %} store-panel--message{% endif %}" data-shop-type="{{ shop_type }}">
   {% if not is_message_state %}
   <div class="store-hero">
-    <div class="store-hero__title">
-      <div class="store-hero__headline">
-        <span class="sr-only">Товары {{ "MK" if shop_type == "regular" else "Premium" }} Shop</span>
-      </div>
-    </div>
+    <h1 class="store-list-title">{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</h1>
   </div>
   {% endif %}
 
@@ -40,42 +36,25 @@
     </p>
   </section>
   {% else %}
-  <section class="store-grid">
+  <section class="store-list" aria-label="Список товаров">
     {% for product in products %}
-    {% set active_variants = product.variants | selectattr('active') | list %}
-    {% set variant = active_variants[0] if active_variants else None %}
-    {% set stock_value = variant.stock if variant and variant.stock is not none else '∞' %}
+    {% set variant = product.variants[0] if product.variants else None %}
     {% set image_src = resolve_image_url(product.image_url) %}
-    <article class="store-card">
-      <div class="store-card__shell">
-        <div class="store-card__frame">
-          {% if image_src %}
-          <img src="{{ image_src }}" alt="{{ product.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
-          <div class="image-placeholder" hidden>Фото</div>
-          {% else %}
-          <div class="image-placeholder">Фото</div>
-          {% endif %}
-        </div>
-        <div class="store-card__qty">{{ stock_value }} шт</div>
-      {% if variant %}
-      <div class="store-card__price">{{ variant.points_cost }} баллов</div>
-      {% endif %}
-        <h3>{{ product.title }}</h3>
-        <p class="store-card__desc">{{ product.description or "" }}</p>
-        <button
-          class="store-card__buy redeem-btn"
-          data-variant="{{ variant.id if variant else '' }}"
-          data-title="{{ product.title }}"
-          data-cost="{{ variant.points_cost if variant else '' }}"
-          {% if preview %}disabled title="В режиме редактора покупка недоступна"{% endif %}
-          {% if not variant %}disabled{% endif %}
-          {% if variant and variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
-        >
-          Купить товар
-        </button>
+    <article class="store-row">
+      <a class="store-row__photo" href="/shop/{{ shop_type }}/product/{{ product.id }}" aria-label="Подробнее: {{ product.title }}">
+        {% if image_src %}<img src="{{ image_src }}" alt="{{ product.title }}" loading="lazy" />{% else %}<span>Нет фото</span>{% endif %}
+      </a>
+      <div class="store-row__info">
+        <h3><a href="/shop/{{ shop_type }}/product/{{ product.id }}">{{ product.title }}</a></h3>
+        <p>{{ product.description or '' }}</p>
       </div>
+      <div class="store-row__stock">{% if variant and variant.stock is not none %}{{ 'Закончился' if variant.stock == 0 else 'Осталось: ' ~ variant.stock ~ ' шт.' }}{% else %}Без ограничений{% endif %}</div>
+      <strong class="store-row__price">{{ variant.points_cost if variant else 0 }} баллов</strong>
+      <button class="btn redeem-btn" data-variant="{{ variant.id if variant else '' }}" data-title="{{ product.title }}" data-cost="{{ variant.points_cost if variant else '' }}"
+        {% if preview %}disabled title="В режиме редактора покупка недоступна"{% endif %}
+        {% if not variant or not variant.active or (variant.stock is not none and variant.stock <= 0) %}disabled{% endif %}>Купить</button>
     </article>
-    {% endfor %}
+    {% else %}<p class="muted">Пока нет товаров.</p>{% endfor %}
   </section>
   {% endif %}
 </section>

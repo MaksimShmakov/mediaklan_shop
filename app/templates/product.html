@@ -1,11 +1,11 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <section class="hero hero--compact">
   <div>
     <p class="kicker">{{ "Обычный" if shop_type == "regular" else "Премиум" }} магазин</p>
     <h1>{{ product.title if product else "Карточка товара" }}</h1>
-    <p>Подберите вариант и подтвердите списание баллов.</p>
+    <p>Подтвердите покупку и списание баллов.</p>
   </div>
   <a class="ghost" href="/shop/{{ shop_type }}">Назад к товарам</a>
 </section>
@@ -33,7 +33,7 @@
 </section>
 {% else %}
 {% set image_src = resolve_image_url(product.image_url) %}
-<section class="card product-detail">
+<section class="card product-detail" data-shop-type="{{ shop_type }}">
   <div class="product-detail__media">
     {% if image_src %}
     <img src="{{ image_src }}" alt="{{ product.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
@@ -45,25 +45,23 @@
   <div class="product-detail__info">
     <h2>{{ product.title }}</h2>
     <p class="muted">{{ product.description or "" }}</p>
-    {% set active_variants = product.variants | selectattr('active') | list %}
+    {% set variant = product.variants[0] if product.variants else None %}
     <div class="product__variants">
-      {% if active_variants %}
-      {% for variant in active_variants %}
+      {% if variant and variant.active %}
       <button
         class="btn btn--ghost redeem-btn"
         data-variant="{{ variant.id }}"
-        data-title="{{ product.title }} — {{ variant.label }}"
+        data-title="{{ product.title }}"
         data-cost="{{ variant.points_cost }}"
         {% if preview %}disabled title="В режиме редактора покупка недоступна"{% endif %}
         {% if variant.stock is not none and variant.stock <= 0 %}disabled{% endif %}
       >
-        <span>{{ variant.label }}</span>
+        <span>Купить</span>
         <span class="pill pill--inline">{{ variant.points_cost }} баллов</span>
         {% if variant.stock is not none %}
         <span class="muted">Осталось: {{ variant.stock }}</span>
         {% endif %}
       </button>
-      {% endfor %}
       {% else %}
       <div class="alert">Покупка на данный момент недоступна.</div>
       {% endif %}

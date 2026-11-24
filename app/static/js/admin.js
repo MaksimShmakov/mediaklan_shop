@@ -95,7 +95,8 @@
       }
       if (!response.ok || (payload && payload.ok === false)) {
         ui.showToast(
-          (payload && payload.message) || "Не удалось сохранить",
+          (payload && (payload.message || (typeof payload.detail === "string" ? payload.detail : null))) ||
+          (response.status === 413 ? "Фото слишком большое. Максимум 15 МБ." : "Не удалось сохранить. Проверьте заполнение полей."),
           true
         );
         return;

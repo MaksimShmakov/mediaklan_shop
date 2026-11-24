@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import SESSION_SECRET, SHOP_TYPES
 from app.core.database import SessionLocal, init_db
 from app.models import ShopSettings
+from app.services.products import prepare_single_product_catalog
 from app.routers import admin, api, auth, shops
 
 app = FastAPI()
@@ -24,6 +25,7 @@ app.include_router(admin.router)
 def on_startup() -> None:
     init_db()
     with SessionLocal() as db:
+        prepare_single_product_catalog(db)
         existing = {
             row.shop_type for row in db.execute(
                 select(ShopSettings)

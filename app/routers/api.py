@@ -147,7 +147,6 @@ def redeem(
             f"Пользователь: {html.escape(user.tg_username)}\n"
             f"Магазин: {shop_label}\n"
             f"Товар: {html.escape(product_title or '')}\n"
-            f"Вариант: {html.escape(variant_label or '')}\n"
             f"Списано: {points_cost or 0} баллов\n"
             f"ID заказа: {order_id}"
         )

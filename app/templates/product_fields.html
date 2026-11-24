@@ -1,0 +1,33 @@
+{% set variant = product.variants[0] if product and product.variants else None %}
+<div class="product-fields">
+  <label class="field product-fields__wide">
+    <span>Название</span>
+    <input type="text" name="title" maxlength="200" value="{{ product.title if product else '' }}" required />
+  </label>
+  <label class="field product-fields__wide">
+    <span>Описание</span>
+    <textarea name="description" rows="2">{{ product.description or '' if product else '' }}</textarea>
+  </label>
+  <label class="field">
+    <span>Стоимость, баллы</span>
+    <input type="number" name="points_cost" min="0" max="2147483647" step="1" value="{{ variant.points_cost if variant else '' }}" required />
+  </label>
+  <label class="field">
+    <span>Количество</span>
+    <input type="number" name="stock" min="0" max="2147483647" step="1" value="{{ variant.stock if variant and variant.stock is not none else '' }}" placeholder="Без ограничений" />
+    <small class="hint">Пусто — без ограничений, 0 — закончился.</small>
+  </label>
+  <label class="field">
+    <span>Позиция</span>
+    <input type="number" name="position" min="0" max="2147483647" step="1" value="{{ product.position if product else 0 }}" required />
+  </label>
+  <label class="checkbox">
+    <input type="checkbox" name="active" {% if not product or product.active %}checked{% endif %} />
+    <span>Активный товар</span>
+  </label>
+  <label class="field product-fields__wide">
+    <span>{{ 'Заменить фото' if product and product.image_url else 'Фото' }}</span>
+    <input type="file" name="image_file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/bmp,image/tiff,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff" />
+    <small class="hint">JPG/JPEG, PNG, WebP, GIF, AVIF, HEIC/HEIF, BMP, TIFF. До 15 МБ и 40 Мп. Фото автоматически готовится для показа в браузере; для GIF используется первый кадр.</small>
+  </label>
+</div>
